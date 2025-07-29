@@ -26,14 +26,14 @@ class ChatInterface:
         """Load response templates for common farmer questions."""
         return {
             'greeting': [
-                "Hello! I'm your organic farm pest management assistant. How can I help you today?",
-                "Welcome to the organic pest management system! What pest issue can I help you with?",
-                "Hi there! Ready to tackle some pest problems organically? What's happening in your fields?"
+                "Hello! I'm your organic farm pest management assistant. Welcome! How can I help you today?",
+                "Welcome to the organic pest management system! Hello there! What pest issue can I help you with?",
+                "Hi there! Welcome! Ready to tackle some pest problems organically? I'm here to help with whatever you need."
             ],
             'pest_identification_help': [
                 "I can help identify pests from photos. Please upload a clear image of the pest or damage you're seeing.",
-                "For best results, take photos in good lighting showing the pest and any damage clearly.",
-                "Multiple angles can help - try to capture the pest, any eggs, and the damage pattern."
+                "For best results, take a photo in good lighting showing the pest and any damage clearly. Upload the image and I'll identify it for you.",
+                "Multiple photo angles can help - try to capture the pest, any eggs, and the damage pattern. Upload your images and I'll identify what you're dealing with."
             ],
             'treatment_explanation': [
                 "All my recommendations are organic-certified and safe for your certification.",
@@ -96,8 +96,10 @@ class ChatInterface:
         """Generate contextual response based on user message."""
         message_lower = message.lower()
         
-        # Greeting detection
-        if any(word in message_lower for word in ['hello', 'hi', 'hey', 'good morning', 'good afternoon']):
+        # Greeting detection (use word boundaries to avoid false matches)
+        import re
+        greeting_pattern = r'\b(hello|hi|hey|good morning|good afternoon)\b'
+        if re.search(greeting_pattern, message_lower):
             return self._get_greeting_response()
         
         # Pest identification requests

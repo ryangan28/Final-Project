@@ -1,0 +1,25 @@
+{
+  "timestamp": 1753763972.543408,
+  "system_info": {
+    "cpu_count": 4,
+    "memory_gb": 8.0,
+    "python_version": "PyTorch not available"
+  },
+  "optimization_results": {
+    "pest_detection": {
+      "status": "failed",
+      "error": "Module onnx is not installed!"
+    },
+    "treatment_engine": {
+      "status": "success",
+      "compressed_db_path": "models\\optimized\\treatments_compressed.json",
+      "rules_engine_path": "models\\optimized\\treatment_rules.json",
+      "total_size_mb": 0.0,
+      "compression_ratio": 0.8,
+      "inference_time_ms": 5
+    }
+  },
+  "recommendations": [
+    "Install full optimization dependencies for complete functionality"
+  ]
+}

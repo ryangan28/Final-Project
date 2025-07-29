@@ -13,6 +13,26 @@ import json
 from unittest.mock import Mock, patch, MagicMock
 import numpy as np
 
+# Try to import torch for testing
+try:
+    import torch
+    TORCH_AVAILABLE = True
+except ImportError:
+    # Create mock torch for testing if not available
+    class MockTorch:
+        float32 = 'float32'
+        float16 = 'float16'
+        
+        @staticmethod
+        def tensor(data):
+            class MockTensor:
+                def __init__(self, data):
+                    self.data = data
+            return MockTensor(data)
+    
+    torch = MockTorch()
+    TORCH_AVAILABLE = False
+
 # Add project root to path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
@@ -70,14 +90,19 @@ class TestPestDetector(unittest.TestCase):
         from PIL import Image
         test_image = Image.new('RGB', (224, 224), color='green')
         
+        # Use a context manager that properly closes the file
         with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp:
-            test_image.save(tmp.name)
-            
+            tmp_path = tmp.name
+        
+        try:
+            test_image.save(tmp_path)
+            severity = self.detector.analyze_severity(tmp_path, 'Aphids')
+            self.assertIn(severity, ['low', 'medium', 'high'])
+        finally:
             try:
-                severity = self.detector.analyze_severity(tmp.name, 'Aphids')
-                self.assertIn(severity, ['low', 'medium', 'high'])
-            finally:
-                os.unlink(tmp.name)
+                os.unlink(tmp_path)
+            except PermissionError:
+                pass  # Ignore permission errors on Windows
     
     @patch('torch.nn.functional.softmax')
     @patch('torch.max')
@@ -91,25 +116,29 @@ class TestPestDetector(unittest.TestCase):
         from PIL import Image
         test_image = Image.new('RGB', (224, 224), color='red')
         
+        # Use a context manager that properly closes the file
         with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp:
-            test_image.save(tmp.name)
+            tmp_path = tmp.name
+        
+        try:
+            test_image.save(tmp_path)
+            results = self.detector.detect(tmp_path)
             
+            # Verify results structure
+            self.assertIn('pest_type', results)
+            self.assertIn('confidence', results)
+            self.assertIn('severity', results)
+            self.assertIn('crops_affected', results)
+            
+            # Verify values
+            self.assertIsInstance(results['confidence'], float)
+            self.assertGreaterEqual(results['confidence'], 0.0)
+            self.assertLessEqual(results['confidence'], 1.0)
+        finally:
             try:
-                results = self.detector.detect(tmp.name)
-                
-                # Verify results structure
-                self.assertIn('pest_type', results)
-                self.assertIn('confidence', results)
-                self.assertIn('severity', results)
-                self.assertIn('crops_affected', results)
-                
-                # Verify values
-                self.assertIsInstance(results['confidence'], float)
-                self.assertGreaterEqual(results['confidence'], 0.0)
-                self.assertLessEqual(results['confidence'], 1.0)
-                
-            finally:
-                os.unlink(tmp.name)
+                os.unlink(tmp_path)
+            except PermissionError:
+                pass  # Ignore permission errors on Windows
 
 
 class TestTreatmentEngine(unittest.TestCase):

@@ -1,0 +1,1 @@
+{"severity_rules":{"low":["cultural","mechanical"],"medium":["biological","mechanical"],"high":["biological","mechanical","emergency"]},"timing_rules":{"immediate":["mechanical","contact"],"short_term":["biological"],"long_term":["cultural","preventive"]},"cost_rules":{"low":["mechanical","cultural"],"medium":["biological"],"high":["specialized"]}}

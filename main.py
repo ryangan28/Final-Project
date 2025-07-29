@@ -27,6 +27,14 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+# Import core components for test patching
+try:
+    from treatments.recommendation_engine import TreatmentEngine
+    from vision.pest_detector import PestDetector
+except ImportError:
+    TreatmentEngine = None
+    PestDetector = None
+
 class PestManagementSystem:
     """Main system orchestrator for the pest management AI."""
     
