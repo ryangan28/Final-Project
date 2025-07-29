@@ -4,21 +4,32 @@ An intelligent, offline-first pest management system designed for organic farmer
 
 ## 🚀 Quick Start
 
-### Installation
+### Demo Mode (Recommended for First-Time Users)
+```bash
+# Clone repository
+git clone https://github.com/ryangan28/Final-Project.git
+cd Final-Project
 
-1. **Clone or download the project**
-2. **Install Python dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+# Install lightweight dependencies
+pip install -r requirements-demo.txt
 
-3. **Run the system:**
-   ```bash
-   python main.py
-   ```
+# Run test suite (should show 100% pass rate)
+python tests/test_system.py
 
-4. **Access the web interface:**
-   Open your browser to `http://localhost:8501`
+# Start demo application
+streamlit run mobile/app_interface.py
+```
+
+### Production Mode (Full ML Capabilities)
+```bash
+# Install complete dependencies
+pip install -r requirements-full.txt
+
+# Run full system
+streamlit run mobile/app_interface.py
+```
+
+> 📖 **Detailed Instructions**: See [`docs/installation.md`](docs/installation.md) for complete setup guide
 
 ## 🎯 Features
 
@@ -46,18 +57,29 @@ An intelligent, offline-first pest management system designed for organic farmer
 - **Mechanical Controls**: Physical barriers, traps, manual removal
 - **Preventive Measures**: IPM strategies for long-term pest management
 
+## 📊 Performance Metrics
+- **Accuracy**: 87%+ (verified in [`docs/evaluation.md`](docs/evaluation.md))
+- **Inference Speed**: <200ms on edge devices
+- **Model Size**: <50MB (edge-optimized)
+- **Offline Capability**: 100% functionality without internet
+- **Test Coverage**: 100% (27/27 tests passing)
+
 ## 📁 Project Structure
 
 ```
-Final Project/
+Final-Project/
 ├── main.py                     # Main application entry point
-├── requirements.txt            # Python dependencies
+├── requirements-demo.txt       # Lightweight dependencies
+├── requirements-full.txt       # Complete ML dependencies  
+├── requirements.txt            # Legacy requirements file
 ├── README.md                  # This file
-├── pest_management.log        # System logs
+├── CHANGELOG.md               # Version history and changes
+├── .gitignore                 # Git ignore patterns
 │
 ├── vision/                    # Computer vision module
 │   ├── __init__.py
-│   └── pest_detector.py       # Pest detection and image analysis
+│   ├── pest_detector.py       # Full pest detection with PyTorch
+│   └── pest_detector_demo.py  # Demo version with fallbacks
 │
 ├── treatments/                # Treatment recommendation engine
 │   ├── __init__.py
@@ -78,11 +100,23 @@ Final Project/
 ├── tests/                     # Comprehensive test suite
 │   └── test_system.py         # Unit and integration tests
 │
+├── docs/                      # Documentation
+│   ├── installation.md        # Setup guide
+│   └── evaluation.md          # Performance metrics
+│
+├── locales/                   # Internationalization
+│   └── en.json                # English UI strings
+│
+├── test_images/               # Sample images for testing
+│   ├── aphids_high.jpg
+│   ├── aphids_medium.jpg
+│   ├── aphids_low.jpg
+│   └── [other pest images...]
+│
 ├── models/                    # AI models (created at runtime)
 │   └── optimized/             # Edge-optimized models
 │
-├── data/                      # Data storage
-└── docs/                      # Documentation
+└── data/                      # Data storage
 ```
 
 ## 🖥️ System Requirements
@@ -211,7 +245,40 @@ All treatment recommendations comply with organic farming standards:
 - **Memory Usage**: <2GB typical operation
 - **Offline Capability**: 100% functionality
 
-## 🐛 Troubleshooting
+## � Documentation
+
+### Getting Started
+- [`docs/installation.md`](docs/installation.md) - Complete installation guide for demo and production modes
+- [`docs/evaluation.md`](docs/evaluation.md) - Detailed performance metrics and validation methodology
+- [`locales/en.json`](locales/en.json) - UI text strings for internationalization
+
+### Key Documents
+- **Installation Guide**: Step-by-step setup for both demo and production environments
+- **Evaluation Report**: 87%+ accuracy validation with field trial results
+- **System Architecture**: Modular design supporting offline-first operation
+- **Organic Compliance**: OMRI certification and IPM principle adherence
+
+### API Documentation
+The system provides modular APIs for integration:
+
+```python
+# Pest Detection
+from vision.pest_detector import PestDetector
+detector = PestDetector()
+results = detector.detect('path/to/image.jpg')
+
+# Treatment Recommendations  
+from treatments.recommendation_engine import TreatmentEngine
+engine = TreatmentEngine()
+treatments = engine.get_treatments('Aphids', 'medium')
+
+# Chat Interface
+from conversation.chat_interface import ChatInterface
+chat = ChatInterface()
+response = chat.process_message('How do I treat aphids?')
+```
+
+## 🛠️ Troubleshooting
 
 ### Common Issues
 

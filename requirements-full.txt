@@ -1,0 +1,26 @@
+# Full Production Dependencies - Complete ML stack for production deployment
+# Includes all demo dependencies plus heavy ML libraries
+
+# Include all demo dependencies
+-r requirements-demo.txt
+
+# Heavy ML Dependencies for Production
+torch>=2.0.0
+torchvision>=0.15.0
+opencv-python>=4.8.0
+
+# Edge Optimization Dependencies
+onnx>=1.14.0
+onnxruntime>=1.15.0
+psutil>=5.9.0
+
+# Advanced Computer Vision
+scikit-image>=0.21.0
+matplotlib>=3.7.0
+
+# Model Training and Evaluation
+scikit-learn>=1.3.0
+pandas>=2.0.0
+
+# Performance Monitoring
+tqdm>=4.65.0

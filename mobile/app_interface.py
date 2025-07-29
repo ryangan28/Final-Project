@@ -9,6 +9,8 @@ from pathlib import Path
 import json
 from datetime import datetime
 import io
+import tempfile
+import os
 from PIL import Image
 import base64
 
@@ -227,26 +229,32 @@ def create_app(pest_system):
                     if st.button("🔬 Analyze Image", type="primary"):
                         with st.spinner("Analyzing image for pest identification..."):
                             try:
-                                # Save uploaded image temporarily
-                                temp_path = f"temp_upload_{datetime.now().timestamp()}.jpg"
-                                image.save(temp_path)
+                                # Use secure temporary file handling
+                                with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as temp_file:
+                                    temp_path = temp_file.name
+                                    image.save(temp_path)
                                 
-                                # Perform pest identification
-                                results = self.system.identify_pest(temp_path)
-                                
-                                # Store results in session state
-                                st.session_state.last_identification = results
-                                
-                                # Clean up temp file
-                                Path(temp_path).unlink(missing_ok=True)
-                                
-                                # Store in recent identifications
-                                if 'recent_identifications' not in st.session_state:
-                                    st.session_state.recent_identifications = []
-                                st.session_state.recent_identifications.append(results)
-                                
-                                st.success("✅ Analysis complete!")
-                                st.rerun()
+                                try:
+                                    # Perform pest identification
+                                    results = self.system.identify_pest(temp_path)
+                                    
+                                    # Store results in session state
+                                    st.session_state.last_identification = results
+                                    
+                                    # Store in recent identifications
+                                    if 'recent_identifications' not in st.session_state:
+                                        st.session_state.recent_identifications = []
+                                    st.session_state.recent_identifications.append(results)
+                                    
+                                    st.success("✅ Analysis complete!")
+                                    st.rerun()
+                                    
+                                finally:
+                                    # Always clean up temp file
+                                    try:
+                                        os.unlink(temp_path)
+                                    except (OSError, PermissionError):
+                                        pass  # Ignore cleanup errors
                                 
                             except Exception as e:
                                 st.error(f"❌ Error during analysis: {str(e)}")
@@ -495,7 +503,34 @@ def create_app(pest_system):
                 st.metric("Pest Detection Model", "✅ Loaded", "Ready")
                 st.metric("Treatment Engine", "✅ Loaded", "50+ treatments")
                 st.metric("Chat Assistant", "✅ Active", "Responding")
-                st.metric("Edge Optimization", "✅ Complete", "Optimized")
+                
+                # Check optimization status with warnings
+                try:
+                    # Check if full optimization is available
+                    import torch
+                    import onnx
+                    import psutil
+                    st.metric("Edge Optimization", "✅ Full", "All features")
+                except ImportError as e:
+                    missing_deps = []
+                    try:
+                        import torch
+                    except ImportError:
+                        missing_deps.append("PyTorch")
+                    try:
+                        import onnx
+                    except ImportError:
+                        missing_deps.append("ONNX")
+                    try:
+                        import psutil
+                    except ImportError:
+                        missing_deps.append("psutil")
+                    
+                    if missing_deps:
+                        st.metric("Edge Optimization", "⚠️ Limited", f"Missing: {', '.join(missing_deps)}")
+                        st.warning(f"⚠️ **Optimization Warning**: Some edge optimization features are unavailable due to missing dependencies: {', '.join(missing_deps)}. The system will use fallback implementations.")
+                    else:
+                        st.metric("Edge Optimization", "✅ Available", "Ready")
                 
                 # Performance metrics
                 st.markdown("### 📊 Performance")

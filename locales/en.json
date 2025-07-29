@@ -1,0 +1,128 @@
+{
+  "app": {
+    "title": "Organic Farm Pest Management AI",
+    "tagline": "AI-Powered Organic Pest Management for Sustainable Agriculture",
+    "description": "Upload images of your crops to identify pests and receive organic, OMRI-certified treatment recommendations."
+  },
+  "navigation": {
+    "pest_identification": "🔍 Pest Identification",
+    "chat_assistant": "💬 Chat Assistant", 
+    "treatment_library": "📚 Treatment Library",
+    "system_status": "⚙️ System Status",
+    "about": "ℹ️ About"
+  },
+  "pest_identification": {
+    "title": "Pest Identification",
+    "upload_prompt": "Upload an image of your crop showing pest damage:",
+    "analyze_button": "🔬 Analyze Image",
+    "analyzing": "Analyzing image for pest identification...",
+    "analysis_complete": "Analysis complete!",
+    "no_results": "No identification results available. Please upload and analyze an image first.",
+    "confidence": "Confidence",
+    "severity": "Severity",
+    "crops_affected": "Crops Affected",
+    "scientific_name": "Scientific Name"
+  },
+  "chat_assistant": {
+    "title": "Chat Assistant",
+    "subtitle": "Ask questions about pest management, treatments, or upload analysis",
+    "placeholder": "Ask me about pest identification, organic treatments, or farming advice...",
+    "send_button": "Send",
+    "clear_button": "🗑️ Clear Chat"
+  },
+  "treatment_library": {
+    "title": "Treatment Library",
+    "subtitle": "Browse organic pest management solutions",
+    "search_placeholder": "Search treatments or pest types...",
+    "filter_all": "All Treatments",
+    "filter_mechanical": "Mechanical",
+    "filter_biological": "Biological", 
+    "filter_cultural": "Cultural",
+    "effectiveness": "Effectiveness",
+    "cost": "Cost",
+    "organic_certified": "Organic Certified"
+  },
+  "system_status": {
+    "title": "System Status",
+    "system_health": "System Health",
+    "performance": "Performance",
+    "troubleshooting": "Troubleshooting",
+    "pest_detection_model": "Pest Detection Model",
+    "treatment_engine": "Treatment Engine",
+    "chat_assistant": "Chat Assistant",
+    "edge_optimization": "Edge Optimization",
+    "model_size": "Model Size",
+    "inference_time": "Inference Time",
+    "accuracy": "Accuracy",
+    "test_pest_detection": "🔄 Test Pest Detection",
+    "test_treatment_engine": "🧪 Test Treatment Engine",
+    "test_chat_assistant": "💬 Test Chat Assistant",
+    "run_edge_optimization": "⚡ Run Edge Optimization",
+    "testing": "Testing",
+    "optimization_warning": "⚠️ **Optimization Warning**: Some edge optimization features are unavailable due to missing dependencies",
+    "system_working": "is working correctly",
+    "test_failed": "test failed",
+    "optimization_complete": "Edge optimization complete",
+    "optimization_failed": "Edge optimization failed"
+  },
+  "about": {
+    "title": "About This System",
+    "description": "This system was developed to help organic farmers identify pests and receive treatment recommendations that comply with organic certification standards.",
+    "features": "Key Features",
+    "pest_detection": "Computer vision pest detection",
+    "organic_treatments": "OMRI-certified organic treatments",
+    "ipm_principles": "Integrated Pest Management principles",
+    "real_time_chat": "Real-time chat assistance",
+    "offline_capable": "Offline-capable edge deployment",
+    "multilingual": "Multi-language support",
+    "technical_details": "Technical Details",
+    "contact": "Contact & Support"
+  },
+  "messages": {
+    "greeting": "Hello! I'm your organic pest management assistant. I can help you identify pests and recommend organic treatments.",
+    "help_pest_id": "To identify a pest, please upload a clear image of the affected plant or pest damage.",
+    "help_treatments": "I can recommend organic, OMRI-certified treatments based on your pest identification results.",
+    "error_upload": "Error uploading image. Please try again.",
+    "error_analysis": "Error analyzing image. Please check the System Status page for troubleshooting.",
+    "success_analysis": "✅ Analysis complete!",
+    "no_image": "Please upload an image first."
+  },
+  "treatments": {
+    "immediate_actions": "Immediate Actions",
+    "short_term": "Short-term Treatment",
+    "long_term": "Long-term Management",
+    "prevention_tips": "Prevention Tips",
+    "ipm_approach": "IPM Approach",
+    "method": "Method",
+    "details": "Details",
+    "effectiveness_levels": {
+      "low": "Low",
+      "medium": "Medium", 
+      "high": "High"
+    },
+    "cost_levels": {
+      "$": "Low Cost",
+      "$$": "Medium Cost",
+      "$$$": "High Cost"
+    }
+  },
+  "severity_levels": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High"
+  },
+  "status": {
+    "online": "✅ Online",
+    "offline": "❌ Offline",
+    "loaded": "✅ Loaded",
+    "active": "✅ Active",
+    "complete": "✅ Complete",
+    "ready": "Ready",
+    "optimized": "Optimized",
+    "healthy": "Healthy",
+    "responding": "Responding",
+    "limited": "⚠️ Limited",
+    "full": "✅ Full",
+    "available": "✅ Available"
+  }
+}
