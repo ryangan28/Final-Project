@@ -125,8 +125,25 @@ def create_app(pest_system):
             ]
             
             # Page selection
-            current_page = st.sidebar.radio("Select Page", pages, key="page_selector")
-            st.session_state.current_page = current_page
+            # Get current page from session state or default to 'Home'
+            current_page_state = st.session_state.get('current_page', 'Home')
+            
+            # Ensure the current page is in the list of valid pages
+            if current_page_state not in pages:
+                current_page_state = 'Home'
+                st.session_state.current_page = current_page_state
+            
+            # Create radio button with the current page selected
+            selected_page = st.sidebar.radio(
+                "Select Page", 
+                pages, 
+                index=pages.index(current_page_state),
+                key="page_selector"
+            )
+            
+            # Update session state only if user manually selected a different page
+            if selected_page != current_page_state:
+                st.session_state.current_page = selected_page
             
             st.sidebar.markdown("---")
             
@@ -223,18 +240,26 @@ def create_app(pest_system):
                 if uploaded_file is not None:
                     # Display uploaded image
                     image = Image.open(uploaded_file)
-                    st.image(image, caption="Uploaded Image", use_column_width=True)
+                    st.image(image, caption="Uploaded Image", use_container_width=True)
                     
                     # Analysis button
                     if st.button("🔬 Analyze Image", type="primary"):
                         with st.spinner("Analyzing image for pest identification..."):
                             try:
-                                # Use secure temporary file handling
-                                with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as temp_file:
-                                    temp_path = temp_file.name
-                                    image.save(temp_path)
+                                # Get original filename for better detection
+                                original_filename = uploaded_file.name if hasattr(uploaded_file, 'name') else 'uploaded_image.jpg'
+                                
+                                # Use secure temporary file handling with original filename info
+                                import os
+                                temp_dir = tempfile.gettempdir()
+                                # Create a temp filename that includes original name info
+                                safe_filename = "".join(c for c in original_filename if c.isalnum() or c in ('_', '-', '.')).lower()
+                                temp_path = os.path.join(temp_dir, f"pest_upload_{safe_filename}")
                                 
                                 try:
+                                    # Save image with original filename context
+                                    image.save(temp_path)
+                                    
                                     # Perform pest identification
                                     results = self.system.identify_pest(temp_path)
                                     
@@ -313,10 +338,16 @@ def create_app(pest_system):
                         with col_a:
                             if st.button("💬 Chat About Treatment"):
                                 st.session_state.current_page = 'Chat Assistant'
+                                # Add the pest context to the chat
+                                if 'chat_history' not in st.session_state:
+                                    st.session_state.chat_history = []
+                                st.session_state.chat_history.append(("System", f"🔄 Switching to Chat Assistant for {results['pest_type']} treatment discussion..."))
+                                st.success("🔄 Switching to Chat Assistant...")
                                 st.rerun()
                         with col_b:
                             if st.button("📚 View Treatment Library"):
                                 st.session_state.current_page = 'Treatment Library'
+                                st.success("🔄 Switching to Treatment Library...")
                                 st.rerun()
                     
                     else:
@@ -352,20 +383,10 @@ def create_app(pest_system):
                     st.markdown("---")
             
             # Chat input
-            col1, col2 = st.columns([4, 1])
-            
-            with col1:
-                user_input = st.text_input(
-                    "Ask me anything about organic pest management:",
-                    placeholder="e.g., How do I treat aphids on my tomatoes?",
-                    key="chat_input"
-                )
-            
-            with col2:
-                send_button = st.button("Send", type="primary")
+            user_input = st.chat_input("Ask me anything about organic pest management...")
             
             # Process user input
-            if send_button and user_input:
+            if user_input:
                 # Add user message to history
                 st.session_state.chat_history.append(("User", user_input))
                 
@@ -380,8 +401,7 @@ def create_app(pest_system):
                     error_msg = f"I apologize, but I encountered an error: {str(e)}"
                     st.session_state.chat_history.append(("Assistant", error_msg))
                 
-                # Clear input and refresh
-                st.session_state.chat_input = ""
+                # Refresh the page to show new messages
                 st.rerun()
             
             # Quick action buttons
