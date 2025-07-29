@@ -10,7 +10,7 @@ An intelligent, offline-first pest management system designed for organic farmer
 python --version
 
 # Clone or download this project
-# Ensure you have the Agricultural Pests Image Dataset in agricultural_pests_image_dataset/
+# Ensure you have the Agricultural Pests Image Dataset in datasets/
 ```
 
 ### Installation & Setup
@@ -103,7 +103,7 @@ Final-Project/
 ├── locales/                   # Internationalization
 │   └── en.json                # English UI strings
 │
-├── agricultural_pests_image_dataset/ # Primary dataset (from Kaggle)
+├── datasets/                  # Agricultural Pests Image Dataset (from Kaggle)
 │   ├── ants/                  # Ant images
 │   ├── bees/                  # Bee images (beneficial)
 │   ├── beetle/                # Beetle images
@@ -171,9 +171,9 @@ This system uses the comprehensive [Agricultural Pests Image Dataset](https://ww
 
 ### Usage Requirements
 1. **Download** the Agricultural Pests Image Dataset from Kaggle
-2. **Extract** to `agricultural_pests_image_dataset/` directory in the project root
+2. **Extract** to `datasets/` directory in the project root
 3. **Verify** the structure matches the project layout above
-4. **Run** the system - demo images will be automatically available
+4. **Run** the system - photo examples will be automatically available
 
 ## 🧪 Testing
 
@@ -242,12 +242,12 @@ This system fully satisfies all project requirements:
 ## 🚀 Getting Started
 
 1. **Download the Agricultural Pests Image Dataset** from Kaggle
-2. **Extract to `agricultural_pests_image_dataset/`** in the project directory
+2. **Extract to `datasets/`** in the project directory
 3. **Install dependencies**: `pip install -r requirements.txt`
 4. **Run the system**: `streamlit run start.py`
 5. **Open your browser** to the displayed URL (typically http://localhost:8501)
-6. **Try the demo images** or upload your own pest photos
-7. **Get instant identification and organic treatment recommendations**
+6. **See photography tips** with good example photos from each pest category
+7. **Upload your own pest photos** and get instant identification and organic treatment recommendations
 
 ## 📞 System Commands
 

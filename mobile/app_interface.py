@@ -247,44 +247,60 @@ def create_app(pest_system):
             col1, col2 = st.columns([1, 1])
             
             with col1:
-                # Demo section with sample images
-                st.markdown("### 🧪 Try Demo Images")
+                # Photography Tips with example images
+                st.markdown("### 📸 Photography Tips")
+                st.markdown("For best identification results, follow these photography guidelines:")
                 
-                # Get available sample images from agricultural dataset
+                # Get available sample images from datasets
                 demo_images = self._get_demo_images()
                 
                 if demo_images:
-                    selected_demo = st.selectbox(
-                        "Choose a sample image to test the system:",
-                        options=["None"] + [f"{pest_type.title()} - {Path(path).name}" for pest_type, path in demo_images],
-                        index=0
-                    )
+                    st.markdown("**Good Photo Examples:**")
                     
-                    if selected_demo != "None":
-                        # Find the selected image path
-                        demo_path = next((path for pest_type, path in demo_images 
-                                        if f"{pest_type.title()} - {Path(path).name}" == selected_demo), None)
+                    # Show 1 example from each pest category in a compact grid
+                    selected_categories = demo_images[:6]  # Show first 6 categories
+                    
+                    # Create 2 columns for grid layout
+                    for i in range(0, len(selected_categories), 2):
+                        row_col1, row_col2 = st.columns(2)
                         
-                        if demo_path and Path(demo_path).exists():
-                            # Display demo image
-                            demo_image = Image.open(demo_path)
-                            st.image(demo_image, caption=f"Demo: {selected_demo}", use_container_width=True)
-                            
-                            # Demo analysis button
-                            if st.button("� Analyze Demo Image", type="secondary", key="demo_analyze"):
-                                with st.spinner("Analyzing demo image..."):
+                        # First image in row
+                        if i < len(selected_categories):
+                            pest_type, image_path = selected_categories[i]
+                            if Path(image_path).exists():
+                                with row_col1:
                                     try:
-                                        results = self.system.identify_pest(demo_path)
-                                        st.session_state.last_identification = results
-                                        
-                                        if 'recent_identifications' not in st.session_state:
-                                            st.session_state.recent_identifications = []
-                                        st.session_state.recent_identifications.append(results)
-                                        
-                                        st.success("✅ Demo analysis complete!")
-                                        st.rerun()
-                                    except Exception as e:
-                                        st.error(f"❌ Demo analysis failed: {str(e)}")
+                                        demo_image = Image.open(image_path)
+                                        st.image(demo_image, caption=f"✅ {pest_type.title()}", use_container_width=True)
+                                    except Exception:
+                                        st.caption(f"✅ {pest_type.title()} (sample)")
+                        
+                        # Second image in row
+                        if i + 1 < len(selected_categories):
+                            pest_type, image_path = selected_categories[i + 1]
+                            if Path(image_path).exists():
+                                with row_col2:
+                                    try:
+                                        demo_image = Image.open(image_path)
+                                        st.image(demo_image, caption=f"✅ {pest_type.title()}", use_container_width=True)
+                                    except Exception:
+                                        st.caption(f"✅ {pest_type.title()} (sample)")
+                    
+                    st.markdown("""
+                    **Tips for Clear Photos:**
+                    - 📱 Hold device steady
+                    - 🔍 Get close to the pest
+                    - ☀️ Use good lighting
+                    - 🎯 Focus on the pest clearly
+                    - 📐 Include size reference if possible
+                    """)
+                else:
+                    st.info("📁 Add datasets folder with pest images for photo examples")
+
+
+
+
+                        
                 
                 st.markdown("---")
                 
@@ -707,10 +723,10 @@ def create_app(pest_system):
                 """)
         
         def _get_demo_images(self):
-            """Get sample images from the agricultural dataset for demo purposes."""
+            """Get sample images from the datasets for demo purposes."""
             try:
-                # Path to agricultural dataset
-                dataset_path = Path("agricultural_pests_image_dataset")
+                # Path to datasets
+                dataset_path = Path("datasets")
                 demo_images = []
                 
                 if dataset_path.exists():

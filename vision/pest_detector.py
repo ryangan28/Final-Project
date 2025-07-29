@@ -228,7 +228,7 @@ class PestDetector:
     def _get_pest_from_filename(self, image_path):
         """
         Extract pest type from filename or directory structure for simulation mode.
-        Supports agricultural_pests_image_dataset format and legacy filename detection.
+        Supports datasets format and legacy filename detection.
         
         Args:
             image_path (str): Path to image file
