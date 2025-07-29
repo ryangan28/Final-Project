@@ -6,8 +6,5 @@ Pillow>=9.5.0
 numpy>=1.24.0
 pathlib2>=2.3.7
 
-# Logging and utilities
-logging-extras>=0.3.0
-
 # Testing framework
 pytest>=7.4.0
