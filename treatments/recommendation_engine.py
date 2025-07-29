@@ -225,6 +225,168 @@ class TreatmentEngine:
                     "Plant after peak emergence in late spring",
                 ],
             },
+            "Ants": {
+                "mechanical": [
+                    self._method("Diatomaceous earth barriers", "Food-grade DE around plants", "medium", "$"),
+                    self._method("Cinnamon powder", "Natural deterrent", "low", "$"),
+                ],
+                "biological": [
+                    self._method("Beneficial nematodes", "Target ant larvae", "medium", "$$"),
+                    self._method("Borax bait stations", "Organic-approved ant killer", "high", "$"),
+                ],
+                "cultural": [
+                    self._method("Remove food sources", "Clean up fallen fruit", "high", "$"),
+                    self._method("Eliminate moisture", "Fix irrigation leaks", "medium", "$"),
+                ],
+                "preventive": [
+                    "Keep garden clean of debris and fallen fruit",
+                    "Seal cracks in garden structures",
+                ],
+            },
+            "Beneficial Insects": {
+                "mechanical": [
+                    self._method("Protection structures", "Provide nesting sites", "high", "$"),
+                ],
+                "biological": [
+                    self._method("Encourage habitat", "Plant native flowers", "high", "$"),
+                    self._method("Avoid disturbance", "Minimize soil disruption", "high", "$"),
+                ],
+                "cultural": [
+                    self._method("Diverse plantings", "Year-round bloom succession", "high", "$"),
+                    self._method("Reduce pesticide use", "Allow natural balance", "high", "$"),
+                ],
+                "preventive": [
+                    "These are beneficial organisms - focus on protection and encouragement",
+                    "Provide overwintering habitat and diverse food sources",
+                ],
+            },
+            "Beetles": {
+                "mechanical": [
+                    self._method("Hand picking", "Remove adult beetles", "medium", "$"),
+                    self._method("Row covers", "Physical exclusion", "high", "$$"),
+                ],
+                "biological": [
+                    self._method("Beneficial nematodes", "Target soil-dwelling larvae", "medium", "$$"),
+                    self._method("Spinosad spray", "Organic insecticide", "high", "$$"),
+                ],
+                "cultural": [
+                    self._method("Crop rotation", "Break pest cycle", "high", "$"),
+                    self._method("Trap crops", "Concentrate beetles for removal", "medium", "$"),
+                ],
+                "preventive": [
+                    "Clean up garden debris in fall",
+                    "Use resistant plant varieties when available",
+                ],
+            },
+            "Earwigs": {
+                "mechanical": [
+                    self._method("Newspaper traps", "Roll up newspaper, place in garden", "medium", "$"),
+                    self._method("Oil pit traps", "Shallow containers with oil", "medium", "$"),
+                ],
+                "biological": [
+                    self._method("Encourage predators", "Birds and ground beetles", "medium", "$"),
+                    self._method("Diatomaceous earth", "Apply around affected plants", "medium", "$"),
+                ],
+                "cultural": [
+                    self._method("Remove hiding places", "Clear debris and mulch", "medium", "$"),
+                    self._method("Improve drainage", "Reduce moist conditions", "medium", "$"),
+                ],
+                "preventive": [
+                    "Keep garden areas dry and well-ventilated",
+                    "Remove excessive organic matter near sensitive plants",
+                ],
+            },
+            "Grasshoppers": {
+                "mechanical": [
+                    self._method("Row covers", "Physical barrier for young plants", "high", "$$"),
+                    self._method("Hand collection", "Early morning when sluggish", "medium", "$"),
+                ],
+                "biological": [
+                    self._method("Nosema locustae", "Biological control agent", "medium", "$$"),
+                    self._method("Encourage birds", "Provide perches and habitat", "medium", "$"),
+                ],
+                "cultural": [
+                    self._method("Habitat modification", "Remove weedy areas", "medium", "$"),
+                    self._method("Timing of plantings", "Avoid vulnerable growth stages", "medium", "$"),
+                ],
+                "preventive": [
+                    "Maintain border strips of grass away from crops",
+                    "Encourage natural predators like birds and spiders",
+                ],
+            },
+            "Moths": {
+                "mechanical": [
+                    self._method("Pheromone traps", "Monitor and trap adults", "medium", "$$"),
+                    self._method("Light traps", "Attract and capture night-flying moths", "medium", "$$"),
+                ],
+                "biological": [
+                    self._method("Bacillus thuringiensis", "Bt spray for larvae", "high", "$$"),
+                    self._method("Parasitic wasps", "Release beneficial insects", "high", "$$$"),
+                ],
+                "cultural": [
+                    self._method("Crop rotation", "Break reproduction cycle", "high", "$"),
+                    self._method("Sanitation", "Remove crop residues", "medium", "$"),
+                ],
+                "preventive": [
+                    "Time plantings to avoid peak moth activity",
+                    "Use resistant varieties when available",
+                ],
+            },
+            "Slugs and Snails": {
+                "mechanical": [
+                    self._method("Copper barriers", "Copper tape around plants", "high", "$$"),
+                    self._method("Beer traps", "Shallow dishes with beer", "medium", "$"),
+                    self._method("Hand picking", "Evening collection", "high", "$"),
+                ],
+                "biological": [
+                    self._method("Iron phosphate bait", "OMRI-listed slug killer", "high", "$$"),
+                    self._method("Encourage predators", "Ground beetles, birds", "medium", "$"),
+                ],
+                "cultural": [
+                    self._method("Reduce moisture", "Improve drainage and spacing", "medium", "$"),
+                    self._method("Remove shelter", "Clear debris and hiding spots", "medium", "$"),
+                ],
+                "preventive": [
+                    "Water in morning to reduce evening moisture",
+                    "Maintain clean, well-drained garden beds",
+                ],
+            },
+            "Wasps": {
+                "mechanical": [
+                    self._method("Physical removal", "Relocate nests if possible", "medium", "$"),
+                    self._method("Protective barriers", "Fine mesh over vulnerable plants", "medium", "$$"),
+                ],
+                "biological": [
+                    self._method("Encourage beneficial wasps", "Provide nectar sources", "high", "$"),
+                    self._method("Natural deterrents", "Peppermint oil spray", "low", "$"),
+                ],
+                "cultural": [
+                    self._method("Habitat management", "Balance beneficial vs. pest species", "medium", "$"),
+                    self._method("Reduce attractants", "Cover sweet fruits", "medium", "$"),
+                ],
+                "preventive": [
+                    "Many wasps are beneficial predators - identify species first",
+                    "Provide alternative habitat away from sensitive areas",
+                ],
+            },
+            "Weevils": {
+                "mechanical": [
+                    self._method("Trunk bands", "Sticky barriers on tree trunks", "medium", "$$"),
+                    self._method("Shake and collect", "Early morning collection", "medium", "$"),
+                ],
+                "biological": [
+                    self._method("Beneficial nematodes", "Target soil-dwelling larvae", "high", "$$"),
+                    self._method("Encourage predators", "Ground beetles and birds", "medium", "$"),
+                ],
+                "cultural": [
+                    self._method("Sanitation", "Remove fallen nuts and fruits", "high", "$"),
+                    self._method("Proper storage", "Sealed containers for grains", "high", "$"),
+                ],
+                "preventive": [
+                    "Inspect stored products regularly",
+                    "Maintain clean storage areas",
+                ],
+            },
         }
 
     @staticmethod

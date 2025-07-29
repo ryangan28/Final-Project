@@ -231,13 +231,14 @@ def launch_console_interface():
             if user_input == 'quit':
                 break
             elif user_input == 'test':
-                # Run a quick system test
-                test_image = "test_images/aphids_high.jpg"
+                # Run a quick system test with agricultural dataset
+                test_image = "agricultural_pests_image_dataset/ants/ants (1).jpg"
                 if Path(test_image).exists():
                     print(f"Testing with {test_image}...")
                     result = system.identify_pest(test_image)
                     print(f"Result: {result}")
                 else:
+                    print("Test image not found. Please ensure agricultural dataset is available.")
                     print("Test image not found")
             else:
                 print("Unknown command. Try 'test' or 'quit'")
@@ -282,7 +283,7 @@ def package_setup():
     # Fallback: just ensure directories are properly configured
     logger.info("[INFO] Ensuring project structure...")
     
-    required_dirs = ["models/optimized", "test_images", "docs"]
+    required_dirs = ["models/optimized"]
     for dir_path in required_dirs:
         Path(dir_path).mkdir(parents=True, exist_ok=True)
     

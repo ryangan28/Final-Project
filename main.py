@@ -92,13 +92,16 @@ class PestManagementSystem:
                 }
             
             # Detect pest in image
-            pest_results = self.pest_detector.detect(image_path)
+            pest_results = self.pest_detector.identify_pest(image_path)
             
             if pest_results['confidence'] > 0.7:
+                # Get treatment category for treatment engine
+                treatment_category = pest_results.get('treatment_category', pest_results['pest_type'].title())
+                
                 # Get treatment recommendations
                 if self.treatment_engine:
                     treatments = self.treatment_engine.get_treatments(
-                        pest_results['pest_type'],
+                        treatment_category,
                         pest_results['severity']
                     )
                 else:

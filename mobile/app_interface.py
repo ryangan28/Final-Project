@@ -193,10 +193,28 @@ def create_app(pest_system):
                 """)
                 
                 # Recent activity (if any)
-                if 'recent_identifications' in st.session_state:
+                if 'recent_identifications' in st.session_state and st.session_state.recent_identifications:
                     st.markdown("### 📝 Recent Activity")
                     for identification in st.session_state.recent_identifications[-3:]:
-                        st.info(f"🐛 Identified: {identification['pest_type']} (Confidence: {identification['confidence']:.1%})")
+                        try:
+                            # Handle different result formats
+                            if isinstance(identification, dict):
+                                if 'pest_type' in identification and 'confidence' in identification:
+                                    pest_type = identification['pest_type']
+                                    confidence = identification['confidence']
+                                    st.info(f"🐛 Identified: {pest_type} (Confidence: {confidence:.1%})")
+                                elif 'success' in identification and identification['success']:
+                                    # Handle main system result format
+                                    pest_type = identification.get('pest_type', 'Unknown')
+                                    confidence = identification.get('confidence', 0.0)
+                                    st.info(f"🐛 Identified: {pest_type} (Confidence: {confidence:.1%})")
+                                else:
+                                    st.warning("⚠️ Incomplete identification result")
+                            else:
+                                st.warning("⚠️ Invalid identification format")
+                        except Exception as e:
+                            st.error(f"❌ Error displaying result: {str(e)}")
+                            continue
             
             with col2:
                 st.markdown("### 🎯 System Capabilities")
@@ -229,7 +247,48 @@ def create_app(pest_system):
             col1, col2 = st.columns([1, 1])
             
             with col1:
-                st.markdown("### 📸 Upload Pest Image")
+                # Demo section with sample images
+                st.markdown("### 🧪 Try Demo Images")
+                
+                # Get available sample images from agricultural dataset
+                demo_images = self._get_demo_images()
+                
+                if demo_images:
+                    selected_demo = st.selectbox(
+                        "Choose a sample image to test the system:",
+                        options=["None"] + [f"{pest_type.title()} - {Path(path).name}" for pest_type, path in demo_images],
+                        index=0
+                    )
+                    
+                    if selected_demo != "None":
+                        # Find the selected image path
+                        demo_path = next((path for pest_type, path in demo_images 
+                                        if f"{pest_type.title()} - {Path(path).name}" == selected_demo), None)
+                        
+                        if demo_path and Path(demo_path).exists():
+                            # Display demo image
+                            demo_image = Image.open(demo_path)
+                            st.image(demo_image, caption=f"Demo: {selected_demo}", use_container_width=True)
+                            
+                            # Demo analysis button
+                            if st.button("� Analyze Demo Image", type="secondary", key="demo_analyze"):
+                                with st.spinner("Analyzing demo image..."):
+                                    try:
+                                        results = self.system.identify_pest(demo_path)
+                                        st.session_state.last_identification = results
+                                        
+                                        if 'recent_identifications' not in st.session_state:
+                                            st.session_state.recent_identifications = []
+                                        st.session_state.recent_identifications.append(results)
+                                        
+                                        st.success("✅ Demo analysis complete!")
+                                        st.rerun()
+                                    except Exception as e:
+                                        st.error(f"❌ Demo analysis failed: {str(e)}")
+                
+                st.markdown("---")
+                
+                st.markdown("### 📸 Upload Your Own Image")
                 
                 uploaded_file = st.file_uploader(
                     "Choose an image file",
@@ -646,42 +705,36 @@ def create_app(pest_system):
                 - Edge computing devices
                 - Offline operation capability
                 """)
-            
-            with col2:
-                st.markdown("""
-                ### 📊 System Specifications
+        
+        def _get_demo_images(self):
+            """Get sample images from the agricultural dataset for demo purposes."""
+            try:
+                # Path to agricultural dataset
+                dataset_path = Path("agricultural_pests_image_dataset")
+                demo_images = []
                 
-                **Pest Database:**
-                - 8 common agricultural pests
-                - 50+ organic treatment methods
-                - IPM-based recommendations
-                - Severity assessment algorithms
+                if dataset_path.exists():
+                    # Get one sample image from each pest category
+                    pest_directories = [
+                        'ants', 'bees', 'beetle', 'caterpillars', 'earthworms', 
+                        'earwig', 'grasshopper', 'moth', 'slug', 'snail', 'wasp', 'weevil'
+                    ]
+                    
+                    for pest_dir in pest_directories:
+                        pest_path = dataset_path / pest_dir
+                        if pest_path.exists():
+                            # Get first image file in the directory
+                            image_files = list(pest_path.glob('*.jpg')) + list(pest_path.glob('*.png'))
+                            if image_files:
+                                demo_images.append((pest_dir, str(image_files[0])))
                 
-                **Model Performance:**
-                - Accuracy: 87%+ on test data
-                - Inference time: <200ms
-                - Model size: <50MB optimized
-                - Offline capability: Full system
+                # Also include legacy test images if available (backward compatibility)
+                # Note: test_images directory removed in final version
                 
-                **Organic Compliance:**
-                - OMRI-approved treatments
-                - Organic certification safe
-                - No synthetic pesticides
-                - Sustainable practices focus
+                return demo_images
                 
-                **Support:**
-                - Built-in help system
-                - Conversational assistance
-                - Treatment guidance
-                - Troubleshooting tools
-                """)
-                
-                st.markdown("### 🎯 Version Information")
-                st.info("""
-                **Version:** 1.0.0
-                **Release Date:** 2025
-                **Last Updated:** Today
-                **License:** Academic Use
-                """)
+            except Exception as e:
+                logger.error(f"Error getting demo images: {e}")
+                return []
     
     return StreamlitApp(pest_system)
