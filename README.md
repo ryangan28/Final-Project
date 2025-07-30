@@ -25,10 +25,16 @@ streamlit run start.py
 ### Alternative Startup
 ```bash
 # Direct main module execution
-python main.py
+python -m streamlit run main.py
 
 # Or use the start script
 python start.py
+```
+
+### To Stop
+```bash
+# To stop the module
+taskkill /f /im python.exe
 ```
 
 ## 🎯 Features
