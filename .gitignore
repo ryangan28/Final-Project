@@ -173,6 +173,10 @@ models/weights/
 # Streamlit
 .streamlit/
 
+# Logs
+logs/
+*.log
+
 # Project-specific temporary files
 debug_*.py
 test_*.py
