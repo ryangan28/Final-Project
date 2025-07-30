@@ -44,11 +44,18 @@ class PestManagementSystem:
         
         # Import modules with error handling
         try:
-            from vision.pest_detector import PestDetector
-            self.pest_detector = PestDetector()
+            from vision.pest_detector_enhanced import EnhancedPestDetector
+            self.pest_detector = EnhancedPestDetector()
+            logger.info("Enhanced pest detector with YOLOv8 support loaded")
         except ImportError as e:
-            logger.warning(f"Vision module not available: {e}")
-            self.pest_detector = None
+            logger.warning(f"Enhanced vision module not available: {e}")
+            try:
+                from vision.pest_detector import PestDetector
+                self.pest_detector = PestDetector()
+                logger.info("Basic pest detector loaded as fallback")
+            except ImportError as e2:
+                logger.warning(f"Vision module not available: {e2}")
+                self.pest_detector = None
             
         try:
             from treatments.recommendation_engine import TreatmentEngine
