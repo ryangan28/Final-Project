@@ -42,20 +42,26 @@ class PestManagementSystem:
         """Initialize the system components."""
         logger.info("Initializing Organic Farm Pest Management AI System")
         
-        # Import modules with error handling
+        # Import modules with error handling - prioritize improved models
         try:
-            from vision.pest_detector_enhanced import EnhancedPestDetector
-            self.pest_detector = EnhancedPestDetector()
-            logger.info("Enhanced pest detector with YOLOv8 support loaded")
+            from vision.improved_pest_detector import ImprovedPestDetector
+            self.pest_detector = ImprovedPestDetector()
+            logger.info("Improved pest detector with EfficientNet-B0 and uncertainty quantification loaded")
         except ImportError as e:
-            logger.warning(f"Enhanced vision module not available: {e}")
+            logger.warning(f"Improved vision module not available: {e}")
             try:
-                from vision.pest_detector import PestDetector
-                self.pest_detector = PestDetector()
-                logger.info("Basic pest detector loaded as fallback")
+                from vision.pest_detector_enhanced import EnhancedPestDetector
+                self.pest_detector = EnhancedPestDetector()
+                logger.info("Enhanced pest detector with YOLOv8 support loaded as fallback")
             except ImportError as e2:
-                logger.warning(f"Vision module not available: {e2}")
-                self.pest_detector = None
+                logger.warning(f"Enhanced vision module not available: {e2}")
+                try:
+                    from vision.pest_detector import PestDetector
+                    self.pest_detector = PestDetector()
+                    logger.info("Basic pest detector loaded as final fallback")
+                except ImportError as e3:
+                    logger.warning(f"Vision module not available: {e3}")
+                    self.pest_detector = None
             
         try:
             from treatments.recommendation_engine import TreatmentEngine
