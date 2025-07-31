@@ -69,16 +69,35 @@ class ModelEvaluator:
         class_mapping_path = self.model_dir / 'class_mapping.json'
         if class_mapping_path.exists():
             with open(class_mapping_path, 'r') as f:
-                return json.load(f)
-        else:
-            # Default mapping
-            from vision.improved_pest_detector import ImprovedPestDetector
-            detector = ImprovedPestDetector()
-            return {
-                'classes': list(detector.PEST_INFO.keys()),
-                'class_to_idx': {cls: idx for idx, cls in enumerate(detector.PEST_INFO.keys())},
-                'num_classes': len(detector.PEST_INFO)
-            }
+                mapping = json.load(f)
+                # Ensure the mapping has the expected structure
+                if isinstance(mapping.get('classes'), list) and isinstance(mapping.get('class_to_idx'), dict):
+                    return mapping
+                else:
+                    logger.warning(f"Invalid class mapping format in {class_mapping_path}")
+        
+        # Default mapping - try multiple model directories
+        for model_dir in [self.model_dir, Path("models/improved_quick"), Path("models/improved")]:
+            class_mapping_path = model_dir / 'class_mapping.json'
+            if class_mapping_path.exists():
+                try:
+                    with open(class_mapping_path, 'r') as f:
+                        mapping = json.load(f)
+                        if isinstance(mapping.get('classes'), list) and isinstance(mapping.get('class_to_idx'), dict):
+                            logger.info(f"Loaded class mapping from {class_mapping_path}")
+                            return mapping
+                except Exception as e:
+                    logger.warning(f"Failed to load class mapping from {class_mapping_path}: {e}")
+        
+        # Final fallback
+        logger.warning("Using default class mapping")
+        from vision.improved_pest_detector import ImprovedPestDetector
+        detector = ImprovedPestDetector()
+        return {
+            'classes': list(detector.PEST_INFO.keys()),
+            'class_to_idx': {cls: idx for idx, cls in enumerate(detector.PEST_INFO.keys())},
+            'num_classes': len(detector.PEST_INFO)
+        }
     
     def evaluate_all_models(self) -> Dict:
         """Evaluate all trained models."""
@@ -127,25 +146,31 @@ class ModelEvaluator:
         """Prepare test dataset for evaluation."""
         augmentations = AgriculturalAugmentations()
         
-        # Create test dataset
+        # Create test dataset with proper class mapping
         test_dataset = ImprovedPestDataset(
             self.data_dir,
             transform=augmentations.get_val_transforms(),
             class_mapping=self.class_mapping
         )
         
+        if len(test_dataset.samples) == 0:
+            logger.error(f"No samples found in dataset directory: {self.data_dir}")
+            return test_dataset
+        
         # Use 20% of data for testing (simulate test split)
         total_samples = len(test_dataset.samples)
-        test_indices = np.random.choice(
-            total_samples, 
-            size=int(0.2 * total_samples), 
-            replace=False
-        )
+        if total_samples > 10:  # Only subsample if we have enough data
+            test_size = max(10, int(0.2 * total_samples))  # At least 10 samples
+            np.random.seed(42)  # For reproducibility
+            test_indices = np.random.choice(
+                total_samples, 
+                size=min(test_size, total_samples), 
+                replace=False
+            )
+            test_samples = [test_dataset.samples[i] for i in test_indices]
+            test_dataset.samples = test_samples
         
-        test_samples = [test_dataset.samples[i] for i in test_indices]
-        test_dataset.samples = test_samples
-        
-        logger.info(f"Test dataset prepared: {len(test_dataset)} samples")
+        logger.info(f"Test dataset prepared: {len(test_dataset)} samples from {total_samples} total")
         return test_dataset
     
     def _extract_fold_number(self, model_path: Path) -> int:
@@ -685,24 +710,41 @@ def main():
     print("🧪 Comprehensive Model Evaluation Suite")
     print("=" * 50)
     
-    # Check if models exist
-    model_dir = Path("models/improved")
-    if not model_dir.exists():
-        print(f"❌ Model directory '{model_dir}' not found!")
-        print("Please train models first using: python training/improved_train.py")
+    # Check multiple possible model directories
+    possible_dirs = [
+        Path("models/improved_quick"),
+        Path("models/improved"),
+        Path("models/improved_notebook")
+    ]
+    
+    model_dir = None
+    model_files = []
+    
+    for directory in possible_dirs:
+        if directory.exists():
+            files = list(directory.glob('best_model_fold_*.pth'))
+            if files:
+                model_dir = directory
+                model_files = files
+                break
+    
+    if not model_dir or not model_files:
+        print("❌ No trained models found!")
+        print("   Searched directories:")
+        for directory in possible_dirs:
+            status = "✅ exists" if directory.exists() else "❌ not found"
+            files_count = len(list(directory.glob('best_model_fold_*.pth'))) if directory.exists() else 0
+            print(f"   {directory}: {status} ({files_count} models)")
+        print()
+        print("Please train models first using:")
+        print("   python training/quick_improved_train.py  # Quick training")
+        print("   python training/improved_train.py        # Full training")
         return
     
-    # Check for trained models
-    model_files = list(model_dir.glob('best_model_fold_*.pth'))
-    if not model_files:
-        print(f"❌ No trained models found in '{model_dir}'!")
-        print("Please train models first using: python training/improved_train.py")
-        return
+    print(f"📁 Found {len(model_files)} trained models in {model_dir}")
     
-    print(f"📁 Found {len(model_files)} trained models")
-    
-    # Initialize evaluator
-    evaluator = ModelEvaluator()
+    # Initialize evaluator with the found model directory
+    evaluator = ModelEvaluator(str(model_dir), data_dir="datasets")
     
     # Run evaluation
     start_time = time.time()

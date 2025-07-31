@@ -133,10 +133,19 @@ class ImprovedPestDataset(Dataset):
         # Get all pest directories
         pest_dirs = [d for d in self.data_dir.iterdir() if d.is_dir()]
         
-        if class_mapping:
-            # Use provided class mapping
-            self.classes = list(class_mapping.keys())
-            self.class_to_idx = {cls: idx for idx, cls in enumerate(self.classes)}
+        if class_mapping and isinstance(class_mapping, dict):
+            # Check if it's a proper class mapping with 'classes' and 'class_to_idx'
+            if 'classes' in class_mapping and 'class_to_idx' in class_mapping:
+                self.classes = class_mapping['classes']
+                self.class_to_idx = class_mapping['class_to_idx']
+            elif isinstance(class_mapping, dict) and all(isinstance(v, int) for v in class_mapping.values()):
+                # Direct mapping format {class_name: index}
+                self.classes = list(class_mapping.keys())
+                self.class_to_idx = class_mapping
+            else:
+                # Fallback to auto-detect
+                self.classes = sorted([d.name for d in pest_dirs])
+                self.class_to_idx = {cls: idx for idx, cls in enumerate(self.classes)}
         else:
             # Auto-detect classes
             self.classes = sorted([d.name for d in pest_dirs])

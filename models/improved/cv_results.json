@@ -1,0 +1,54 @@
+{
+  "mean_accuracy": 93.10137879940532,
+  "std_accuracy": 0.5705409813352492,
+  "fold_accuracies": [
+    93.63057324840764,
+    93.5395814376706,
+    93.35759781619655,
+    92.90263876251137,
+    92.07650273224044
+  ],
+  "config": {
+    "description": "Full training for production deployment",
+    "image_size": 224,
+    "batch_size": 32,
+    "num_epochs": 100,
+    "learning_rate": 0.0001,
+    "weight_decay": 0.0001,
+    "patience": 15,
+    "min_delta": 0.0001,
+    "num_folds": 5,
+    "device": "cuda"
+  },
+  "class_mapping": {
+    "classes": [
+      "ants",
+      "bees",
+      "beetle",
+      "catterpillar",
+      "earthworms",
+      "earwig",
+      "grasshopper",
+      "moth",
+      "slug",
+      "snail",
+      "wasp",
+      "weevil"
+    ],
+    "class_to_idx": {
+      "ants": 0,
+      "bees": 1,
+      "beetle": 2,
+      "catterpillar": 3,
+      "earthworms": 4,
+      "earwig": 5,
+      "grasshopper": 6,
+      "moth": 7,
+      "slug": 8,
+      "snail": 9,
+      "wasp": 10,
+      "weevil": 11
+    },
+    "num_classes": 12
+  }
+}
