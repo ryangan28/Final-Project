@@ -15,20 +15,29 @@ python --version
 
 ### Installation & Setup
 ```bash
-# Install dependencies
+# Automated setup (recommended)
+python start.py --setup
+
+# Manual installation
 pip install -r requirements.txt
 
 # Run the system
-streamlit run start.py
+python start.py
 ```
 
-### Alternative Startup
+### Alternative Launch Methods
 ```bash
-# Direct main module execution
-python -m streamlit run main.py
+# Streamlit web interface
+streamlit run main.py
 
-# Or use the start script
-python start.py
+# Console mode for testing
+python start.py --console
+
+# Check system status
+python start.py --check
+
+# Enhanced features (ONNX optimization)
+python start.py --enhanced
 ```
 
 ## 🎯 Features
@@ -60,9 +69,10 @@ python start.py
 │   └── MODEL_TRAINING_GUIDE.md
 │
 ├── 👁️ vision/               # Computer vision modules
-│   ├── pest_detector.py     # Base detector
+│   ├── pest_detector.py     # Base detector with simulation fallback
 │   ├── pest_detector_enhanced.py  # YOLOv8 implementation
-│   └── pest_detector_production.py  # Production optimized
+│   ├── pest_detector_production.py  # Production optimized
+│   └── improved_pest_detector.py   # EfficientNet with uncertainty quantification
 │
 ├── 🌿 treatments/           # Treatment recommendation engine
 │   └── recommendation_engine.py
@@ -83,8 +93,12 @@ python start.py
 │   └── pest_classifier2/
 │
 ├── 🎓 training/            # Model training pipeline
-│   ├── train_yolo_model.py # Full training script
+│   ├── train_yolo_model.py # Full YOLOv8 training script
 │   ├── quick_train.py      # Quick training for testing
+│   ├── improved_train.py   # EfficientNet training with uncertainty
+│   ├── improved_train.ipynb # Jupyter notebook for training experiments
+│   ├── quick_improved_train.py # Quick improved training
+│   ├── evaluate_model.py   # Model evaluation and metrics
 │   └── datasets_split/     # Training/validation splits
 │
 ├── 📊 datasets/            # Agricultural pest dataset
@@ -96,10 +110,11 @@ python start.py
 ## 🔧 Technical Details
 
 ### Computer Vision
-- **Model**: YOLOv8-nano optimized for edge deployment
-- **Training**: Custom fine-tuned on Agricultural Pests Dataset
-- **Inference**: ONNX format for efficient processing
-- **Performance**: Real-time identification on mobile devices
+- **Models**: Multiple architectures including EfficientNet-B0 and YOLOv8-nano
+- **Training**: Custom fine-tuned on Agricultural Pests Dataset with uncertainty quantification
+- **Inference**: Both PyTorch and ONNX formats for flexible deployment
+- **Performance**: <200ms inference with confidence scoring and uncertainty estimation
+- **Features**: Ensemble methods, Monte Carlo dropout, and comprehensive error handling
 
 ### Treatment Engine
 - **Standards**: OMRI-approved organic treatments only
@@ -125,24 +140,35 @@ python start.py
 # Get instant organic treatment recommendations
 ```
 
-### Model Training
+### Model Training & Evaluation
 ```bash
 # Quick training for testing
 cd training
 python quick_train.py
 
-# Full training pipeline
+# Improved training with uncertainty quantification
+python quick_improved_train.py
+
+# Full YOLOv8 training pipeline
 python train_yolo_model.py
+
+# Model evaluation and performance metrics
+python evaluate_model.py
+
+# Quick evaluation script
+cd .. && python quick_evaluate.py
 ```
 
 ## 🏆 Project Achievements
 
 - ✅ **Complete offline operation** - Works without internet
 - ✅ **19 pest species detection** - Comprehensive agricultural coverage  
+- ✅ **Advanced ML models** - EfficientNet with uncertainty quantification
 - ✅ **Organic treatments only** - OMRI-approved recommendations
 - ✅ **Mobile responsive** - Works on all devices
-- ✅ **Edge optimized** - Efficient inference on low-power devices
-- ✅ **Production ready** - Suitable for real-world farm deployment
+- ✅ **Edge optimized** - Multiple inference backends (PyTorch/ONNX)
+- ✅ **Production ready** - Robust error handling and graceful degradation
+- ✅ **Model evaluation** - Comprehensive metrics and performance analysis
 
 ## 📚 Documentation
 
@@ -155,12 +181,14 @@ python train_yolo_model.py
 
 **Status: COMPLETE ✅**
 
-This project successfully implements all required features:
-- Computer vision pest detection using fine-tuned YOLOv8
-- Conversational AI interface for farmer guidance
-- Comprehensive organic treatment recommendations
-- Complete offline operation on edge devices
-- Mobile-friendly responsive design
+This project successfully implements all required features with advanced improvements:
+- **Computer vision pest detection** using multiple architectures (EfficientNet-B0, YOLOv8)
+- **Uncertainty quantification** for reliable predictions in agricultural settings
+- **Conversational AI interface** for farmer guidance and support
+- **Comprehensive organic treatment recommendations** with IPM principles
+- **Complete offline operation** on edge devices with graceful degradation
+- **Mobile-friendly responsive design** with image upload and camera support
+- **Model evaluation framework** with comprehensive metrics and visualization
 
 ---
 
@@ -298,25 +326,45 @@ This system uses the comprehensive [Agricultural Pests Image Dataset](https://ww
 3. **Verify** the structure matches the project layout above
 4. **Run** the system - photo examples will be automatically available
 
-## 🧪 Testing
+## 🧪 Testing & Evaluation
 
+### System Testing
 Run the comprehensive test suite to verify system functionality:
 
 ```bash
 # Core system tests
 python tests/test_system.py
+
+# Improved system tests with ML validation
+python test_improved_system.py
+```
+
+### Model Evaluation
+Evaluate model performance with detailed metrics:
+
+```bash
+# Quick evaluation with sample predictions
+python quick_evaluate.py
+
+# Comprehensive model evaluation
+cd training && python evaluate_model.py
+
+# Debug evaluation for troubleshooting
+python debug_evaluation.py
 ```
 
 ### Test Coverage
 The test suite validates:
 - ✅ Computer vision pest detection (19 species)
+- ✅ Model uncertainty quantification and confidence scoring
 - ✅ Treatment recommendation engine (17 pest categories)
 - ✅ Conversational AI interface
-- ✅ Edge optimization
-- ✅ System integration
+- ✅ Edge optimization and ONNX compatibility
+- ✅ System integration with graceful degradation
 - ✅ Agricultural dataset compatibility
 - ✅ Beneficial species detection
 - ✅ Data integrity and organic compliance
+- ✅ Performance metrics and evaluation framework
 
 ## 🔧 Technical Specifications
 
@@ -335,10 +383,19 @@ The test suite validates:
 
 ### Dependencies
 Key packages include:
-- `streamlit` - Web interface
-- `Pillow` - Image processing
-- `torch` - Deep learning (optional, graceful degradation)
+- `streamlit` - Web interface and user interaction
+- `Pillow` - Image processing and manipulation
+- `torch` & `torchvision` - Deep learning (optional, graceful degradation)
+- `numpy` - Numerical computations
+- `opencv-python` - Advanced image processing (optional)
+- `onnx` - Model optimization and cross-platform deployment (optional)
 - `pathlib` - File system operations
+
+### Model Files
+The system includes pre-trained models:
+- `pest_model_yolov8n.pt` - YOLOv8-nano model for efficient detection
+- `yolov8n-cls.pt` - YOLOv8 classification baseline
+- Enhanced EfficientNet models (created during training)
 
 ## 🌐 Offline Operation
 
