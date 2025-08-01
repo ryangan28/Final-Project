@@ -714,7 +714,6 @@ def main():
     possible_dirs = [
         Path("models/improved_quick"),
         Path("models/improved"),
-        Path("models/improved_notebook")
     ]
     
     model_dir = None
