@@ -17,13 +17,18 @@ onnx>=1.14.0                         # Model optimization for edge deployment
 psutil>=5.9.0                        # System performance monitoring
 
 # =============================================================================
-# FULL ML STACK (Optional - For complete computer vision)
-# Uncomment the lines below for production ML deployment
+# IMPROVED ML STACK (For enhanced pest detection with EfficientNet-B0)
 # =============================================================================
 
-# Core ML Framework
-# torch>=2.0.0                       # PyTorch deep learning framework
-# torchvision>=0.15.0                # Computer vision models and utilities
+# Core ML Framework - Uncomment for improved training/inference
+torch>=2.0.0                       # PyTorch deep learning framework
+torchvision>=0.15.0                # Computer vision models and utilities
+scikit-learn>=1.3.0                # Machine learning utilities
+
+# Data Science & Visualization
+matplotlib>=3.7.0                  # Plotting and visualization
+seaborn>=0.12.0                    # Statistical visualization
+pandas>=2.0.0                      # Data manipulation
 
 # Computer Vision Libraries  
 # opencv-python>=4.8.0               # OpenCV for advanced image processing
@@ -31,7 +36,6 @@ psutil>=5.9.0                        # System performance monitoring
 
 # Advanced Edge Optimization
 # onnxruntime>=1.15.0                # ONNX runtime for inference
-# matplotlib>=3.7.0                  # Plotting and visualization
 
 # =============================================================================
 # DEVELOPMENT & TESTING (Optional - For developers)

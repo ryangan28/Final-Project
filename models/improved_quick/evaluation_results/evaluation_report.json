@@ -1,0 +1,513 @@
+{
+  "evaluation_timestamp": 1753962904.0587552,
+  "test_dataset_size": 1098,
+  "num_classes": 12,
+  "class_names": [
+    "ants",
+    "bees",
+    "beetle",
+    "catterpillar",
+    "earthworms",
+    "earwig",
+    "grasshopper",
+    "moth",
+    "slug",
+    "snail",
+    "wasp",
+    "weevil"
+  ],
+  "individual_model_results": {
+    "fold_0": {
+      "accuracy": 0.9754098360655737,
+      "macro_precision": 0.9739725203545194,
+      "macro_recall": 0.9744597008606184,
+      "macro_f1": 0.9739967849426918,
+      "weighted_precision": 0.9759116870511393,
+      "weighted_recall": 0.9754098360655737,
+      "weighted_f1": 0.9754574874947409,
+      "per_class_metrics": {
+        "ants": {
+          "precision": 1.0,
+          "recall": 0.9901960784313726,
+          "f1_score": 0.9950738916256158,
+          "support": 102
+        },
+        "bees": {
+          "precision": 0.9894736842105263,
+          "recall": 0.9894736842105263,
+          "f1_score": 0.9894736842105263,
+          "support": 95
+        },
+        "beetle": {
+          "precision": 0.8977272727272727,
+          "recall": 0.9518072289156626,
+          "f1_score": 0.9239766081871345,
+          "support": 83
+        },
+        "catterpillar": {
+          "precision": 0.975,
+          "recall": 0.9176470588235294,
+          "f1_score": 0.9454545454545454,
+          "support": 85
+        },
+        "earthworms": {
+          "precision": 0.9516129032258065,
+          "recall": 0.9833333333333333,
+          "f1_score": 0.9672131147540983,
+          "support": 60
+        },
+        "earwig": {
+          "precision": 1.0,
+          "recall": 0.9578947368421052,
+          "f1_score": 0.978494623655914,
+          "support": 95
+        },
+        "grasshopper": {
+          "precision": 0.97,
+          "recall": 0.9897959183673469,
+          "f1_score": 0.9797979797979798,
+          "support": 98
+        },
+        "moth": {
+          "precision": 0.9767441860465116,
+          "recall": 0.9882352941176471,
+          "f1_score": 0.9824561403508771,
+          "support": 85
+        },
+        "slug": {
+          "precision": 0.9662921348314607,
+          "recall": 0.9555555555555556,
+          "f1_score": 0.9608938547486033,
+          "support": 90
+        },
+        "snail": {
+          "precision": 0.9906542056074766,
+          "recall": 1.0,
+          "f1_score": 0.9953051643192489,
+          "support": 106
+        },
+        "wasp": {
+          "precision": 0.9805825242718447,
+          "recall": 0.9901960784313726,
+          "f1_score": 0.9853658536585366,
+          "support": 102
+        },
+        "weevil": {
+          "precision": 0.9895833333333334,
+          "recall": 0.979381443298969,
+          "f1_score": 0.9844559585492227,
+          "support": 97
+        }
+      },
+      "confusion_matrix": [
+        [
+          101,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          94,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          79,
+          0,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          1,
+          1
+        ],
+        [
+          0,
+          0,
+          1,
+          78,
+          2,
+          0,
+          2,
+          1,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          1,
+          59,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          2,
+          0,
+          0,
+          91,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          97,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          84,
+          1,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          86,
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          106,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          101,
+          0
+        ],
+        [
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          95
+        ]
+      ],
+      "confidence_statistics": {
+        "mean_confidence": 0.9824603199958801,
+        "std_confidence": 0.07007105648517609,
+        "min_confidence": 0.3972075283527374,
+        "max_confidence": 1.0
+      },
+      "calibration_analysis": {
+        "expected_calibration_error": 0.009556732026822841,
+        "bin_accuracies": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.6,
+          0.0,
+          0.625,
+          0.7333333333333333,
+          0.9,
+          0.9932756964457252
+        ],
+        "bin_confidences": [
+          0.0,
+          0.0,
+          0.0,
+          0.3972075283527374,
+          0.4770662784576416,
+          0.5573937296867371,
+          0.6547897458076477,
+          0.7537029981613159,
+          0.8619369268417358,
+          0.9968464374542236
+        ],
+        "bin_counts": [
+          0,
+          0,
+          0,
+          1,
+          5,
+          8,
+          8,
+          15,
+          20,
+          1041
+        ],
+        "reliability_diagram_data": {
+          "bin_boundaries": [
+            0.0,
+            0.1,
+            0.2,
+            0.30000000000000004,
+            0.4,
+            0.5,
+            0.6000000000000001,
+            0.7000000000000001,
+            0.8,
+            0.9,
+            1.0
+          ],
+          "accuracies": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.6,
+            0.0,
+            0.625,
+            0.7333333333333333,
+            0.9,
+            0.9932756964457252
+          ],
+          "confidences": [
+            0.0,
+            0.0,
+            0.0,
+            0.3972075283527374,
+            0.4770662784576416,
+            0.5573937296867371,
+            0.6547897458076477,
+            0.7537029981613159,
+            0.8619369268417358,
+            0.9968464374542236
+          ]
+        }
+      },
+      "performance_statistics": {
+        "mean_inference_time_ms": 4157.434715543474,
+        "std_inference_time_ms": 1638.6643769810105,
+        "throughput_samples_per_second": 0.2405329412056147
+      },
+      "model_parameters": 4669577,
+      "num_test_samples": 1098,
+      "model_path": "models/improved_quick/best_model_fold_0.pth",
+      "training_accuracy": 91.04803493449782,
+      "training_epoch": 11
+    }
+  },
+  "cross_model_statistics": {
+    "mean_accuracy": 0.9754098360655737,
+    "std_accuracy": 0.0,
+    "best_accuracy": 0.9754098360655737,
+    "worst_accuracy": 0.9754098360655737,
+    "mean_f1_score": 0.9754574874947409,
+    "std_f1_score": 0.0,
+    "mean_inference_time_ms": 4157.434715543474,
+    "std_inference_time_ms": 0.0
+  },
+  "class_performance_analysis": {
+    "per_class_statistics": {
+      "ants": {
+        "mean_f1_score": 0.9950738916256158,
+        "std_f1_score": 0.0,
+        "mean_precision": 1.0,
+        "mean_recall": 0.9901960784313726,
+        "avg_support": 102.0,
+        "difficulty_ranking": 0.0049261083743842304
+      },
+      "bees": {
+        "mean_f1_score": 0.9894736842105263,
+        "std_f1_score": 0.0,
+        "mean_precision": 0.9894736842105263,
+        "mean_recall": 0.9894736842105263,
+        "avg_support": 95.0,
+        "difficulty_ranking": 0.010526315789473717
+      },
+      "beetle": {
+        "mean_f1_score": 0.9239766081871345,
+        "std_f1_score": 0.0,
+        "mean_precision": 0.8977272727272727,
+        "mean_recall": 0.9518072289156626,
+        "avg_support": 83.0,
+        "difficulty_ranking": 0.07602339181286555
+      },
+      "catterpillar": {
+        "mean_f1_score": 0.9454545454545454,
+        "std_f1_score": 0.0,
+        "mean_precision": 0.975,
+        "mean_recall": 0.9176470588235294,
+        "avg_support": 85.0,
+        "difficulty_ranking": 0.054545454545454564
+      },
+      "earthworms": {
+        "mean_f1_score": 0.9672131147540983,
+        "std_f1_score": 0.0,
+        "mean_precision": 0.9516129032258065,
+        "mean_recall": 0.9833333333333333,
+        "avg_support": 60.0,
+        "difficulty_ranking": 0.032786885245901676
+      },
+      "earwig": {
+        "mean_f1_score": 0.978494623655914,
+        "std_f1_score": 0.0,
+        "mean_precision": 1.0,
+        "mean_recall": 0.9578947368421052,
+        "avg_support": 95.0,
+        "difficulty_ranking": 0.021505376344086002
+      },
+      "grasshopper": {
+        "mean_f1_score": 0.9797979797979798,
+        "std_f1_score": 0.0,
+        "mean_precision": 0.97,
+        "mean_recall": 0.9897959183673469,
+        "avg_support": 98.0,
+        "difficulty_ranking": 0.02020202020202022
+      },
+      "moth": {
+        "mean_f1_score": 0.9824561403508771,
+        "std_f1_score": 0.0,
+        "mean_precision": 0.9767441860465116,
+        "mean_recall": 0.9882352941176471,
+        "avg_support": 85.0,
+        "difficulty_ranking": 0.01754385964912286
+      },
+      "slug": {
+        "mean_f1_score": 0.9608938547486033,
+        "std_f1_score": 0.0,
+        "mean_precision": 0.9662921348314607,
+        "mean_recall": 0.9555555555555556,
+        "avg_support": 90.0,
+        "difficulty_ranking": 0.03910614525139666
+      },
+      "snail": {
+        "mean_f1_score": 0.9953051643192489,
+        "std_f1_score": 0.0,
+        "mean_precision": 0.9906542056074766,
+        "mean_recall": 1.0,
+        "avg_support": 106.0,
+        "difficulty_ranking": 0.0046948356807511304
+      },
+      "wasp": {
+        "mean_f1_score": 0.9853658536585366,
+        "std_f1_score": 0.0,
+        "mean_precision": 0.9805825242718447,
+        "mean_recall": 0.9901960784313726,
+        "avg_support": 102.0,
+        "difficulty_ranking": 0.014634146341463428
+      },
+      "weevil": {
+        "mean_f1_score": 0.9844559585492227,
+        "std_f1_score": 0.0,
+        "mean_precision": 0.9895833333333334,
+        "mean_recall": 0.979381443298969,
+        "avg_support": 97.0,
+        "difficulty_ranking": 0.015544041450777257
+      }
+    },
+    "most_challenging_classes": [
+      "beetle",
+      "catterpillar",
+      "slug"
+    ],
+    "easiest_classes": [
+      "bees",
+      "ants",
+      "snail"
+    ]
+  },
+  "production_readiness_assessment": {
+    "accuracy_ready": true,
+    "accuracy_score": 0.9754098360655737,
+    "speed_ready": false,
+    "inference_time_ms": 4157.434715543474,
+    "stability_ready": true,
+    "accuracy_std": 0.0,
+    "overall_production_ready": false,
+    "readiness_score": 0.6666666666666666,
+    "production_criteria": {
+      "min_accuracy": 0.8,
+      "max_inference_time_ms": 500,
+      "min_confidence_reliability": 0.85,
+      "max_model_size_mb": 100,
+      "min_cross_validation_stability": 0.05
+    }
+  },
+  "recommendations": [
+    "\u2705 Excellent accuracy (97.54%) - ready for production",
+    "\u26a1 Optimize inference speed (4157.4ms) with model compression or hardware acceleration",
+    "\ud83d\udcc8 Monitor model performance in production with A/B testing",
+    "\ud83d\udd04 Implement gradual rollout with fallback to simulation mode",
+    "\ud83d\udcdd Set up automated retraining pipeline with new data",
+    "\ud83d\udee1\ufe0f Add uncertainty thresholding for low-confidence predictions"
+  ]
+}

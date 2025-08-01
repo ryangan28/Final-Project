@@ -7,6 +7,7 @@ import logging
 from pathlib import Path
 import json
 from copy import deepcopy
+from typing import Union, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +18,7 @@ class TreatmentEngine:
     severity-aware, IPM-consistent recommendations.
     """
 
-    def __init__(self, db_path: str | Path | None = None):
+    def __init__(self, db_path: Optional[Union[str, Path]] = None):
         # ---------- 1. Treatment database ----------
         self.treatments_db: dict = (
             self._load_json(db_path)
