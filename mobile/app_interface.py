@@ -16,6 +16,10 @@ import base64
 
 logger = logging.getLogger(__name__)
 
+# Constants
+EDGE_OPTIMIZATION_LABEL = "Edge Optimization"
+
+
 def create_app(pest_system):
     """
     Create Streamlit web application for the pest management system.
@@ -35,7 +39,7 @@ def create_app(pest_system):
         def setup_page_config(self):
             """Configure Streamlit page settings."""
             st.set_page_config(
-                page_title="🌱 Organic Farm Pest Management AI",
+                page_title="Organic Farm Pest Management AI",
                 page_icon="🌱",
                 layout="wide",
                 initial_sidebar_state="expanded"
@@ -353,7 +357,7 @@ def create_app(pest_system):
                                     # Always clean up temp file
                                     try:
                                         os.unlink(temp_path)
-                                    except (OSError, PermissionError):
+                                    except OSError:
                                         pass  # Ignore cleanup errors
                                 
                             except Exception as e:
@@ -601,7 +605,7 @@ def create_app(pest_system):
                         st.markdown(f"**Details:** {details}")
                         st.markdown(f"**Effectiveness:** {effectiveness}")
                         st.markdown(f"**Cost:** {cost}")
-                        st.markdown(f"**Organic Certified:** ✅")
+                        st.markdown("**Organic Certified:** ✅")
         
         def show_system_status(self):
             """Display system status and diagnostics."""
@@ -644,13 +648,13 @@ def create_app(pest_system):
                 
                 # Display appropriate status based on available features
                 if optimization_level == "enhanced":
-                    st.metric("Edge Optimization", "🚀 Enhanced", "Complete ML stack")
+                    st.metric(EDGE_OPTIMIZATION_LABEL, "🚀 Enhanced", "Complete ML stack")
                     st.success("📈 **Enhanced Mode**: Full ML optimization capabilities available.")
                 elif optimization_level == "standard":
-                    st.metric("Edge Optimization", "✅ Standard", f"{len(optimization_features)} features")
+                    st.metric(EDGE_OPTIMIZATION_LABEL, "✅ Standard", f"{len(optimization_features)} features")
                     st.info(f"📊 **Standard Mode**: Core ML features available - {', '.join(optimization_features)}")
                 else:
-                    st.metric("Edge Optimization", "✅ Lightweight", "Simulation-based")
+                    st.metric(EDGE_OPTIMIZATION_LABEL, "✅ Lightweight", "Simulation-based")
                     st.info("🌱 **Lightweight Mode**: Intelligent simulation system optimized for organic farming. Provides reliable pest detection without requiring heavy ML dependencies - perfect for edge deployment.")
                 
                 # Performance metrics
@@ -695,8 +699,8 @@ def create_app(pest_system):
                             st.error(f"❌ Chat assistant test failed: {str(e)}")
                 
                 # Edge optimization status
-                st.markdown("### 🔄 Edge Optimization")
-                if st.button("⚡ Run Edge Optimization"):
+                st.markdown(f"### 🔄 {EDGE_OPTIMIZATION_LABEL}")
+                if st.button(f"⚡ Run {EDGE_OPTIMIZATION_LABEL}"):
                     with st.spinner("Optimizing models for edge deployment..."):
                         try:
                             optimization_results = self.system.optimize_for_edge()

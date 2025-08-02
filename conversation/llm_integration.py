@@ -112,14 +112,14 @@ Keep responses practical, farmer-friendly, and focused on sustainable agricultur
                 return result['choices'][0]['message']['content']
             else:
                 logger.error(f"LM Studio API error: {response.status_code}")
-                return self._fallback_response(user_message)
+                return self._fallback_response()
                 
         except requests.exceptions.RequestException as e:
             logger.error(f"Connection to LM Studio failed: {e}")
-            return self._fallback_response(user_message)
+            return self._fallback_response()
         except Exception as e:
             logger.error(f"LLM generation failed: {e}")
-            return self._fallback_response(user_message)
+            return self._fallback_response()
 
     def _format_pest_context(self, pest_context: Dict[str, Any]) -> str:
         """Format pest detection context for LLM."""
@@ -142,7 +142,7 @@ Keep responses practical, farmer-friendly, and focused on sustainable agricultur
         
         return "PEST DETECTION CONTEXT:\n" + "\n".join(context_parts)
 
-    def _fallback_response(self, user_message: str) -> str:
+    def _fallback_response(self) -> str:
         """Provide fallback response when LLM is unavailable."""
         return """I'm currently having trouble connecting to the AI assistant. However, I can still help you with basic pest management guidance. 
 

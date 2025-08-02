@@ -161,7 +161,7 @@ class ChatInterface:
         
         # Treatment questions
         if any(word in message_lower for word in ['how to treat', 'treatment', 'control', 'get rid of']):
-            return self._get_treatment_guidance(message)
+            return self._get_treatment_guidance()
         
         # Urgency questions
         if any(word in message_lower for word in ['urgent', 'emergency', 'spreading fast', 'quickly']):
@@ -188,7 +188,7 @@ class ChatInterface:
             return self._get_effectiveness_info()
         
         # Default response with context
-        return self._get_contextual_response(message)
+        return self._get_contextual_response()
     
     def _get_greeting_response(self):
         """Generate greeting response."""
@@ -215,7 +215,7 @@ class ChatInterface:
         
         return f"{response}\n\n" + "\n".join(tips)
     
-    def _get_treatment_guidance(self, message):
+    def _get_treatment_guidance(self):
         """Provide treatment guidance based on context."""
         if not self.context.get('pest_type'):
             return ("I'd be happy to help with treatment options! First, let me identify the pest. "
@@ -377,7 +377,7 @@ class ChatInterface:
                "• Proper timing of treatments\n"
                "• Healthy ecosystem maintenance")
     
-    def _get_contextual_response(self, message):
+    def _get_contextual_response(self):
         """Generate response based on current context."""
         if self.context.get('pest_type'):
             pest_type = self.context['pest_type']

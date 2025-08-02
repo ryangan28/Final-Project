@@ -11,6 +11,14 @@ from typing import Union, Optional
 
 logger = logging.getLogger(__name__)
 
+# Treatment method constants
+BACILLUS_THURINGIENSIS = "Bacillus thuringiensis"
+ROW_COVERS = "Row covers"
+CROP_ROTATION = "Crop rotation"
+BENEFICIAL_NEMATODES = "Beneficial nematodes"
+TRAP_CROPS = "Trap crops"
+ENCOURAGE_PREDATORS = "Encourage predators"
+
 
 class TreatmentEngine:
     """
@@ -123,10 +131,10 @@ class TreatmentEngine:
                     self._method("Hand-picking", "Remove larvae", "high", "$"),
                 ],
                 "biological": [
-                    self._method("Bacillus thuringiensis", "Bt spray", "high", "$$"),
+                    self._method(BACILLUS_THURINGIENSIS, "Bt spray", "high", "$$"),
                 ],
                 "cultural": [
-                    self._method("Row covers", "Exclude moths", "high", "$$"),
+                    self._method(ROW_COVERS, "Exclude moths", "high", "$$"),
                 ],
                 "preventive": ["Rotate brassicas on a 3-year schedule"],
             },
@@ -183,11 +191,11 @@ class TreatmentEngine:
                     self._method("Hand-picking", "Remove adults and larvae", "high", "$"),
                 ],
                 "biological": [
-                    self._method("Bacillus thuringiensis", "Bt var. tenebrionis", "high", "$$"),
+                    self._method(BACILLUS_THURINGIENSIS, "Bt var. tenebrionis", "high", "$$"),
                     self._method("Neem oil", "Growth regulator", "medium", "$"),
                 ],
                 "cultural": [
-                    self._method("Crop rotation", "Break life cycle", "high", "$"),
+                    self._method(CROP_ROTATION, "Break life cycle", "high", "$"),
                 ],
                 "preventive": [
                     "Rotate solanaceous crops every 3 years",
@@ -196,14 +204,14 @@ class TreatmentEngine:
             },
             "Cucumber Beetle": {
                 "mechanical": [
-                    self._method("Row covers", "Exclude beetles", "high", "$$"),
+                    self._method(ROW_COVERS, "Exclude beetles", "high", "$$"),
                 ],
                 "biological": [
-                    self._method("Beneficial nematodes", "Soil application", "medium", "$$"),
+                    self._method(BENEFICIAL_NEMATODES, "Soil application", "medium", "$$"),
                     self._method("Kaolin clay", "Repellent spray", "medium", "$"),
                 ],
                 "cultural": [
-                    self._method("Trap crops", "Plant radishes as decoy", "medium", "$"),
+                    self._method(TRAP_CROPS, "Plant radishes as decoy", "medium", "$"),
                 ],
                 "preventive": [
                     "Delay planting until after peak beetle emergence",
@@ -212,14 +220,14 @@ class TreatmentEngine:
             },
             "Flea Beetle": {
                 "mechanical": [
-                    self._method("Row covers", "Physical barrier", "high", "$$"),
+                    self._method(ROW_COVERS, "Physical barrier", "high", "$$"),
                 ],
                 "biological": [
-                    self._method("Beneficial nematodes", "Target larvae", "medium", "$$"),
+                    self._method(BENEFICIAL_NEMATODES, "Target larvae", "medium", "$$"),
                     self._method("Diatomaceous earth", "Dust on plants", "medium", "$"),
                 ],
                 "cultural": [
-                    self._method("Trap crops", "Plant radishes early", "medium", "$"),
+                    self._method(TRAP_CROPS, "Plant radishes early", "medium", "$"),
                 ],
                 "preventive": [
                     "Till soil in fall to expose overwintering adults",
@@ -232,7 +240,7 @@ class TreatmentEngine:
                     self._method("Cinnamon powder", "Natural deterrent", "low", "$"),
                 ],
                 "biological": [
-                    self._method("Beneficial nematodes", "Target ant larvae", "medium", "$$"),
+                    self._method(BENEFICIAL_NEMATODES, "Target ant larvae", "medium", "$$"),
                     self._method("Borax bait stations", "Organic-approved ant killer", "high", "$"),
                 ],
                 "cultural": [
@@ -264,15 +272,15 @@ class TreatmentEngine:
             "Beetles": {
                 "mechanical": [
                     self._method("Hand picking", "Remove adult beetles", "medium", "$"),
-                    self._method("Row covers", "Physical exclusion", "high", "$$"),
+                    self._method(ROW_COVERS, "Physical exclusion", "high", "$$"),
                 ],
                 "biological": [
-                    self._method("Beneficial nematodes", "Target soil-dwelling larvae", "medium", "$$"),
+                    self._method(BENEFICIAL_NEMATODES, "Target soil-dwelling larvae", "medium", "$$"),
                     self._method("Spinosad spray", "Organic insecticide", "high", "$$"),
                 ],
                 "cultural": [
-                    self._method("Crop rotation", "Break pest cycle", "high", "$"),
-                    self._method("Trap crops", "Concentrate beetles for removal", "medium", "$"),
+                    self._method(CROP_ROTATION, "Break pest cycle", "high", "$"),
+                    self._method(TRAP_CROPS, "Concentrate beetles for removal", "medium", "$"),
                 ],
                 "preventive": [
                     "Clean up garden debris in fall",
@@ -285,7 +293,7 @@ class TreatmentEngine:
                     self._method("Oil pit traps", "Shallow containers with oil", "medium", "$"),
                 ],
                 "biological": [
-                    self._method("Encourage predators", "Birds and ground beetles", "medium", "$"),
+                    self._method(ENCOURAGE_PREDATORS, "Birds and ground beetles", "medium", "$"),
                     self._method("Diatomaceous earth", "Apply around affected plants", "medium", "$"),
                 ],
                 "cultural": [
@@ -299,7 +307,7 @@ class TreatmentEngine:
             },
             "Grasshoppers": {
                 "mechanical": [
-                    self._method("Row covers", "Physical barrier for young plants", "high", "$$"),
+                    self._method(ROW_COVERS, "Physical barrier for young plants", "high", "$$"),
                     self._method("Hand collection", "Early morning when sluggish", "medium", "$"),
                 ],
                 "biological": [
@@ -321,11 +329,11 @@ class TreatmentEngine:
                     self._method("Light traps", "Attract and capture night-flying moths", "medium", "$$"),
                 ],
                 "biological": [
-                    self._method("Bacillus thuringiensis", "Bt spray for larvae", "high", "$$"),
+                    self._method(BACILLUS_THURINGIENSIS, "Bt spray for larvae", "high", "$$"),
                     self._method("Parasitic wasps", "Release beneficial insects", "high", "$$$"),
                 ],
                 "cultural": [
-                    self._method("Crop rotation", "Break reproduction cycle", "high", "$"),
+                    self._method(CROP_ROTATION, "Break reproduction cycle", "high", "$"),
                     self._method("Sanitation", "Remove crop residues", "medium", "$"),
                 ],
                 "preventive": [
@@ -341,7 +349,7 @@ class TreatmentEngine:
                 ],
                 "biological": [
                     self._method("Iron phosphate bait", "OMRI-listed slug killer", "high", "$$"),
-                    self._method("Encourage predators", "Ground beetles, birds", "medium", "$"),
+                    self._method(ENCOURAGE_PREDATORS, "Ground beetles, birds", "medium", "$"),
                 ],
                 "cultural": [
                     self._method("Reduce moisture", "Improve drainage and spacing", "medium", "$"),
@@ -376,8 +384,8 @@ class TreatmentEngine:
                     self._method("Shake and collect", "Early morning collection", "medium", "$"),
                 ],
                 "biological": [
-                    self._method("Beneficial nematodes", "Target soil-dwelling larvae", "high", "$$"),
-                    self._method("Encourage predators", "Ground beetles and birds", "medium", "$"),
+                    self._method(BENEFICIAL_NEMATODES, "Target soil-dwelling larvae", "high", "$$"),
+                    self._method(ENCOURAGE_PREDATORS, "Ground beetles and birds", "medium", "$"),
                 ],
                 "cultural": [
                     self._method("Sanitation", "Remove fallen nuts and fruits", "high", "$"),
@@ -394,12 +402,12 @@ class TreatmentEngine:
     def _default_imp_principles() -> dict:
         return {
             "prevention": [
-                "Crop rotation",
+                CROP_ROTATION,
                 "Resistant cultivars",
             ],
             "cultural_controls": [
                 "Sanitation",
-                "Trap crops",
+                TRAP_CROPS,
             ],
             "biological_controls": [
                 "Predatory insects",

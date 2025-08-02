@@ -106,6 +106,50 @@ def check_dependencies():
     
     return missing_packages, optional_missing
 
+def _install_onnx_package(pip_cmd, logger):
+    """Helper function to install ONNX package."""
+    logger.info("[INSTALL] Installing ONNX for enhanced edge optimization...")
+    try:
+        onnx_result = subprocess.run(
+            pip_cmd + ['install', 'onnx>=1.14.0'],
+            capture_output=True,
+            text=True,
+            timeout=120
+        )
+        if onnx_result.returncode == 0:
+            logger.info("[OK] ONNX installed successfully - Enhanced optimization available")
+            return True
+        else:
+            logger.warning("[WARN] ONNX installation failed, continuing with lightweight mode")
+            return False
+    except Exception as e:
+        logger.warning(f"[WARN] ONNX installation error: {e}")
+        return False
+
+def _install_requirements_file(pip_cmd, requirements_file, logger):
+    """Helper function to install from requirements file."""
+    try:
+        result = subprocess.run(
+            pip_cmd + ['install', '-r', requirements_file],
+            capture_output=True,
+            text=True,
+            timeout=300  # 5 minutes timeout
+        )
+        
+        if result.returncode == 0:
+            logger.info("[OK] Dependencies installed successfully")
+            return True
+        else:
+            logger.error(f"[ERROR] Failed to install dependencies: {result.stderr}")
+            return False
+            
+    except subprocess.TimeoutExpired:
+        logger.error("[ERROR] Installation timed out")
+        return False
+    except Exception as e:
+        logger.error(f"[ERROR] Installation failed: {str(e)}")
+        return False
+
 def install_dependencies(missing_packages=None, install_optional=False):
     """Install missing dependencies."""
     logger = logging.getLogger(__name__)
@@ -129,42 +173,15 @@ def install_dependencies(missing_packages=None, install_optional=False):
     requirements_file = "requirements.txt"
     logger.info(f"[INSTALL] Installing dependencies from {requirements_file}...")
     
-    try:
-        result = subprocess.run(
-            pip_cmd + ['install', '-r', requirements_file],
-            capture_output=True,
-            text=True,
-            timeout=300  # 5 minutes timeout
-        )
-        
-        if result.returncode == 0:
-            logger.info("[OK] Dependencies installed successfully")
-            
-            # Try installing ONNX specifically for enhanced optimization
-            if install_optional or 'onnx' in missing_packages:
-                logger.info("[INSTALL] Installing ONNX for enhanced edge optimization...")
-                onnx_result = subprocess.run(
-                    pip_cmd + ['install', 'onnx>=1.14.0'],
-                    capture_output=True,
-                    text=True,
-                    timeout=120
-                )
-                if onnx_result.returncode == 0:
-                    logger.info("[OK] ONNX installed successfully - Enhanced optimization available")
-                else:
-                    logger.warning("[WARN] ONNX installation failed, continuing with lightweight mode")
-            
-            return True
-        else:
-            logger.error(f"[ERROR] Failed to install dependencies: {result.stderr}")
-            return False
-            
-    except subprocess.TimeoutExpired:
-        logger.error("[ERROR] Installation timed out")
+    # Install from requirements file
+    if not _install_requirements_file(pip_cmd, requirements_file, logger):
         return False
-    except Exception as e:
-        logger.error(f"[ERROR] Installation failed: {str(e)}")
-        return False
+    
+    # Try installing ONNX specifically for enhanced optimization
+    if install_optional or 'onnx' in missing_packages:
+        _install_onnx_package(pip_cmd, logger)
+    
+    return True
 
 def check_system_requirements():
     """Check system requirements and configuration."""
@@ -280,19 +297,25 @@ def package_setup():
                 logger.info("[OK] Package setup complete - development mode")
                 return True
             else:
-                logger.warning(f"[WARN] Package setup failed: {result.stderr}")
+                logger.error(f"[ERROR] Package setup failed: {result.stderr}")
+                return False
         except Exception as e:
-            logger.warning(f"[WARN] Package setup error: {e}")
+            logger.error(f"[ERROR] Package setup error: {e}")
+            return False
     
     # Fallback: just ensure directories are properly configured
     logger.info("[INFO] Ensuring project structure...")
     
     required_dirs = ["models/optimized"]
-    for dir_path in required_dirs:
-        Path(dir_path).mkdir(parents=True, exist_ok=True)
-    
-    logger.info("[OK] Basic package setup complete")
-    return True
+    try:
+        for dir_path in required_dirs:
+            Path(dir_path).mkdir(parents=True, exist_ok=True)
+        
+        logger.info("[OK] Basic package setup complete")
+        return True
+    except Exception as e:
+        logger.error(f"[ERROR] Failed to create required directories: {e}")
+        return False
 
 def install_enhanced_features():
     """Install enhanced features including ONNX for better optimization."""
@@ -330,8 +353,8 @@ def install_enhanced_features():
     
     return True
 
-def main():
-    """Main entry point with argument parsing."""
+def _create_argument_parser():
+    """Create and configure argument parser."""
     parser = argparse.ArgumentParser(
         description="Organic Farm Pest Management AI System",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -359,6 +382,58 @@ Examples:
     parser.add_argument('--package-setup', action='store_true',
                        help='Setup the system as a Python package (development mode)')
     
+    return parser
+
+def _handle_check_mode(args, missing_packages, optional_missing, logger):
+    """Handle dependency check mode."""
+    if not args.check:
+        return
+        
+    if missing_packages:
+        logger.warning(f"[MISSING] Missing packages: {', '.join(missing_packages)}")
+        logger.info("Run 'python start.py --setup' to install missing dependencies")
+        sys.exit(1)
+    elif optional_missing:
+        logger.info(f"[OPTIONAL] Optional packages not installed: {', '.join(optional_missing)}")
+        logger.info("Run 'python start.py --enhanced' to install enhanced features")
+    else:
+        logger.info("[OK] All dependencies are satisfied")
+    sys.exit(0)
+
+def _handle_special_modes(args, logger):
+    """Handle special operation modes (package setup, enhanced features)."""
+    # Package setup mode
+    if args.package_setup:
+        if not package_setup():
+            sys.exit(1)
+        sys.exit(0)
+    
+    # Enhanced features installation
+    if args.enhanced:
+        install_enhanced_features()
+        logger.info("[OK] Enhanced features installation complete")
+        sys.exit(0)
+
+def _handle_dependencies(args, missing_packages, optional_missing, logger):
+    """Handle dependency installation."""
+    # Install dependencies if needed or forced
+    install_optional = args.enhanced or args.force_install
+    if missing_packages or args.force_install:
+        if not install_dependencies(missing_packages, install_optional):
+            logger.error("[ERROR] Failed to install dependencies")
+            sys.exit(1)
+    
+    # Setup mode with optional features
+    if args.setup:
+        if optional_missing:
+            logger.info("[SETUP] Installing enhanced features for better performance...")
+            install_enhanced_features()
+        logger.info("[OK] Setup completed successfully")
+        sys.exit(0)
+
+def main():
+    """Main entry point with argument parsing."""
+    parser = _create_argument_parser()
     args = parser.parse_args()
     
     # Setup logging
@@ -377,43 +452,10 @@ Examples:
     # Check dependencies
     missing_packages, optional_missing = check_dependencies()
     
-    if args.check:
-        if missing_packages:
-            logger.warning(f"[MISSING] Missing packages: {', '.join(missing_packages)}")
-            logger.info("Run 'python start.py --setup' to install missing dependencies")
-            sys.exit(1)
-        elif optional_missing:
-            logger.info(f"[OPTIONAL] Optional packages not installed: {', '.join(optional_missing)}")
-            logger.info("Run 'python start.py --enhanced' to install enhanced features")
-        else:
-            logger.info("[OK] All dependencies are satisfied")
-        sys.exit(0)
-    
-    # Package setup mode
-    if args.package_setup:
-        package_setup()
-        sys.exit(0)
-    
-    # Enhanced features installation
-    if args.enhanced:
-        install_enhanced_features()
-        logger.info("[OK] Enhanced features installation complete")
-        sys.exit(0)
-    
-    # Install dependencies if needed or forced
-    install_optional = args.enhanced or args.force_install
-    if missing_packages or args.force_install:
-        if not install_dependencies(missing_packages, install_optional):
-            logger.error("[ERROR] Failed to install dependencies")
-            sys.exit(1)
-    
-    if args.setup:
-        # Also try to install enhanced features during setup
-        if optional_missing:
-            logger.info("[SETUP] Installing enhanced features for better performance...")
-            install_enhanced_features()
-        logger.info("[OK] Setup completed successfully")
-        sys.exit(0)
+    # Handle different modes
+    _handle_check_mode(args, missing_packages, optional_missing, logger)
+    _handle_special_modes(args, logger)
+    _handle_dependencies(args, missing_packages, optional_missing, logger)
     
     # Launch the appropriate interface
     if args.console:
