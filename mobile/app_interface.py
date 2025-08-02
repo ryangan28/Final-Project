@@ -416,7 +416,25 @@ def create_app(pest_system):
                                 # Add the pest context to the chat
                                 if 'chat_history' not in st.session_state:
                                     st.session_state.chat_history = []
-                                st.session_state.chat_history.append(("System", f"🔄 Switching to Chat Assistant for {results['pest_type']} treatment discussion..."))
+                                    
+                                # Set the last identification context
+                                st.session_state.last_identification = results
+                                
+                                # Automatically send a treatment question to LM Studio
+                                pest_name = results['pest_type']
+                                treatment_question = f"I have identified {pest_name} in my crops. What are the best organic treatment options available? Please provide specific recommendations."
+                                
+                                st.session_state.chat_history.append(("System", f"🔄 Switching to Chat Assistant for {pest_name} treatment discussion..."))
+                                st.session_state.chat_history.append(("User", treatment_question))
+                                
+                                # Get AI response for treatment
+                                try:
+                                    ai_response = self.system.chat_with_system(treatment_question, results)
+                                    st.session_state.chat_history.append(("Assistant", ai_response))
+                                except Exception as e:
+                                    error_msg = f"I apologize, but I encountered an error getting treatment recommendations: {str(e)}"
+                                    st.session_state.chat_history.append(("Assistant", error_msg))
+                                
                                 st.success("🔄 Switching to Chat Assistant...")
                                 st.rerun()
                         with col_b:
@@ -720,6 +738,33 @@ def create_app(pest_system):
                 - Mobile devices
                 - Edge computing devices
                 - Offline operation capability
+                """)
+            
+            with col2:
+                st.markdown("""
+                ### 👥 Development Team
+                
+                This project was developed by a collaborative team from **Singapore Institute of Technology (SIT)**:
+                
+                **Information and Communications Technology (ICT)**
+                - **Ryan Koo Wei Feng**
+                - **Farihin Fatten Binte Abdul Rahman**
+                - **Khoo Ye Chen**
+                - **Gan Kang Ting, Ryan**
+                - **Donovan Leong Jia Le**
+                
+                **Project Scope:**
+                - 🎓 Final Project for Overseas Immersion Programme
+                - 🚀 Real-world agricultural technology application
+                - 🤝 Interdisciplinary team approach (SE + IS + AI)
+                
+                **Academic Institution:**
+                - 🏫 Singapore Institute of Technology (SIT)
+                - 🎓 FPT University Da Nang
+                
+                **Special Thanks:**
+                - Open-source community contributors
+                - Academic supervisors and mentors
                 """)
         
         def _get_demo_images(self):

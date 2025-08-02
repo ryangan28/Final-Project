@@ -64,7 +64,7 @@ def quick_train():
         
         # Load YOLOv8n-cls model
         print("📥 Loading YOLOv8-nano classification model...")
-        model = YOLO('yolov8n-cls.pt')  # Automatically downloads if not present
+        model = YOLO('models/yolov8n-cls.pt')  # Use model from models folder
         
         # Train the model
         print("🚀 Starting training...")
@@ -117,13 +117,13 @@ def quick_train():
         
         # Copy best model to main directory for easy access
         import shutil
-        main_model_path = Path("pest_model_yolov8n.pt")
+        main_model_path = Path("models/pest_model_yolov8n.pt")
         shutil.copy2(best_model, main_model_path)
         print(f"\n✅ Model copied to: {main_model_path}")
         
         print("\n🔧 To use the trained model:")
         print("   1. Update vision/pest_detector.py to use the trained model")
-        print("   2. Set model_path='pest_model_yolov8n.pt' in PestDetector initialization")
+        print("   2. Set model_path='models/pest_model_yolov8n.pt' in PestDetector initialization")
         print("   3. The system will automatically use the trained model instead of simulation")
         
         return True
@@ -138,7 +138,7 @@ def quick_train():
 
 def test_trained_model():
     """Test the trained model with a sample image."""
-    model_path = Path("pest_model_yolov8n.pt")
+    model_path = Path("models/pest_model_yolov8n.pt")
     
     if not model_path.exists():
         print("❌ Trained model not found. Run training first.")

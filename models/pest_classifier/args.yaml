@@ -1,6 +1,6 @@
 task: classify
 mode: train
-model: yolov8n-cls.pt
+model: ../yolov8n-cls.pt
 data: datasets
 epochs: 30
 time: null

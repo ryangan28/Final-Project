@@ -20,11 +20,15 @@ import platform
 
 def setup_logging():
     """Configure logging for startup process."""
+    # Ensure logs directory exists
+    import os
+    os.makedirs('logs', exist_ok=True)
+    
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - STARTUP - %(levelname)s - %(message)s',
         handlers=[
-            logging.FileHandler('pest_management.log', encoding='utf-8'),
+            logging.FileHandler('logs/pest_management.log', encoding='utf-8'),
             logging.StreamHandler()
         ]
     )

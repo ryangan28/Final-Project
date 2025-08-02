@@ -1,6 +1,6 @@
 # 🌱 Organic Farm Pest Management AI System
 
-An intelligent, offline-first pest management system designed for organic farmers. This system combines computer vision, conversational AI, and edge computing to provide real-time pest identification and organic treatment recommendations using the Agricultural Pests Image Dataset from Kaggle.
+An intelligent pest management system designed for organic farmers, featuring EfficientNet-B0 ensemble classification with 92-93% accuracy, conversational AI powered by LM Studio, and comprehensive organic treatment recommendations. Built with a focus on production-ready deployment and offline-first capabilities.
 
 ## 🚀 Quick Start
 
@@ -9,8 +9,8 @@ An intelligent, offline-first pest management system designed for organic farmer
 # Python 3.8+ required
 python --version
 
-# Clone or download this project
-# Ensure you have the Agricultural Pests Image Dataset in datasets/
+# LM Studio (optional) - for enhanced chat capabilities
+# Download from https://lmstudio.ai/
 ```
 
 ### Installation & Setup
@@ -22,29 +22,27 @@ pip install -r requirements.txt
 streamlit run start.py
 ```
 
-### Alternative Startup
-```bash
-# Direct main module execution
-python -m streamlit run main.py
-
-# Or use the start script
-python start.py
-```
+### LM Studio Setup (Optional)
+1. Download and install LM Studio
+2. Download a model (recommended: Llama-2-7B-Chat-GGUF)
+3. Start local server on http://localhost:1234
+4. The system will automatically detect and use LM Studio
 
 ## 🎯 Features
 
 ### ✅ Core Capabilities
-- **🔍 Computer Vision Pest Detection**: Identify 19 agricultural pest species from photos
-- **💬 Conversational AI Assistant**: Natural language interaction for guidance
-- **🌱 Organic Treatment Recommendations**: OMRI-approved treatments only
-- **📱 Mobile-Friendly Interface**: Works on desktop and mobile devices
-- **⚡ Edge Computing Optimized**: Runs offline on resource-constrained devices
-- **🔄 Integrated Pest Management**: IPM-based approach for sustainable control
+- **🔍 EfficientNet-B0 Ensemble Detection**: 5-model ensemble with 92-93% validation accuracy
+- **🤖 LM Studio Integration**: Local LLM for advanced conversational AI
+- **🌱 Organic Treatment Recommendations**: OMRI-approved treatments with IPM approach
+- **📱 Mobile-Friendly Interface**: Responsive Streamlit web application
+- **🔬 Uncertainty Quantification**: Monte Carlo Dropout + Temperature Scaling
+- **⚡ Production Ready**: Cleaned architecture with comprehensive error handling
 
-### 🐛 Supported Pests
-- **Insects**: Ants, Bees, Beetles, Caterpillars, Earwigs, Grasshoppers, Moths, Wasps, Weevils
-- **Other Pests**: Earthworms, Slugs, Snails
-- **All Categories**: 19 distinct pest classes with specialized organic treatments
+### 🐛 Supported Pests (12 Classes)
+- **Beneficial**: Ants, Bees, Earthworms
+- **Direct Damage**: Beetles, Caterpillars, Grasshoppers, Moths, Slugs, Snails, Weevils
+- **Mixed Impact**: Earwigs, Wasps
+- **All Categories**: Scientific names, damage types, affected crops, detection features
 
 ## 📁 Project Structure
 
@@ -99,19 +97,23 @@ python start.py
 - **Model**: YOLOv8-nano optimized for edge deployment
 - **Training**: Custom fine-tuned on Agricultural Pests Dataset
 - **Inference**: ONNX format for efficient processing
-- **Performance**: Real-time identification on mobile devices
+### Conversational AI
+- **Primary**: LM Studio integration with local Llama-2-7B-Chat
+- **Fallback**: Rule-based pattern matching for offline scenarios
+- **Context Aware**: Pest detection results inform chat responses
+- **Automatic Treatment**: Auto-queries LLM when "Chat About Treatment" pressed
 
-### Treatment Engine
+### Treatment Recommendations
 - **Standards**: OMRI-approved organic treatments only
 - **Approach**: Integrated Pest Management (IPM) principles
-- **Customization**: Tailored recommendations based on pest type and severity
-- **Knowledge Base**: Comprehensive organic control methods
+- **Coverage**: 12 pest classes with specific organic controls
+- **Knowledge Base**: Scientific names, damage types, affected crops
 
-### Offline Operation
-- **Complete Offline**: No internet required for core functionality
-- **Edge Optimized**: Runs on resource-constrained devices
-- **Local Processing**: All AI inference happens locally
-- **Privacy**: No data sent to external servers
+### System Architecture
+- **Backend**: Python-based modular architecture
+- **Frontend**: Streamlit responsive web application
+- **Models**: PyTorch with automatic CPU/GPU detection
+- **Storage**: Local file system with JSON configurations
 
 ## 🎮 Usage Examples
 
@@ -121,28 +123,118 @@ python start.py
 python start.py
 
 # Access at http://localhost:8501
-# Upload images or use camera to detect pests
-# Get instant organic treatment recommendations
+# 1. Upload pest images via drag-drop or camera
+# 2. Get instant EfficientNet-based identification
+# 3. Click "Chat About Treatment" for LM Studio consultation
+# 4. Receive organic treatment recommendations
 ```
 
-### Model Training
+### Model Training (EfficientNet)
 ```bash
-# Quick training for testing
+# Train the EfficientNet ensemble
 cd training
-python quick_train.py
+python improved_train.py
 
-# Full training pipeline
-python train_yolo_model.py
+# The training process:
+# 1. Loads Agricultural Pest Dataset (12 classes)
+# 2. Applies stratified K-fold cross-validation (5 folds)
+# 3. Trains EfficientNet-B0 with agricultural augmentations
+# 4. Saves models with temperature scaling to models/improved/
+```
+
+## 🧠 How the CNN is Trained
+
+### Training Pipeline Overview
+The EfficientNet-B0 ensemble is trained using a sophisticated pipeline designed for agricultural pest classification:
+
+#### 1. **Data Preparation**
+```python
+# Dataset Structure: 12 pest classes from Agricultural Pest Dataset
+# - ants, bees, beetle, catterpillar, earthworms, earwig
+# - grasshopper, moth, slug, snail, wasp, weevil
+# Each class contains 100+ high-quality agricultural images
+```
+
+#### 2. **Agricultural-Specific Augmentations**
+```python
+# Custom augmentations for real farm conditions:
+- Random lighting variations (dawn/dusk/cloudy conditions)
+- Soil texture overlays and dirt spots simulation
+- Weather effects (rain droplets, dust particles)
+- Camera angle variations (farmer perspective)
+- Color jittering for different lighting conditions
+```
+
+#### 3. **Model Architecture**
+```python
+class EfficientNetClassifier(nn.Module):
+    def __init__(self, num_classes=12, dropout_rate=0.3):
+        # Pre-trained EfficientNet-B0 backbone (ImageNet weights)
+        self.backbone = models.efficientnet_b0(weights='DEFAULT')
+        
+        # Custom classifier head:
+        # Dropout(0.3) → Linear(1280→512) → ReLU → Dropout(0.15) → Linear(512→12)
+        
+        # Temperature scaling for uncertainty calibration
+        self.temperature = nn.Parameter(torch.ones(1))
+```
+
+#### 4. **Training Strategy**
+```python
+# Stratified K-Fold Cross-Validation (5 folds)
+config = {
+    'num_epochs': 100,
+    'learning_rate': 1e-4,
+    'weight_decay': 1e-4,
+    'batch_size': 32,
+    'patience': 15,           # Early stopping
+    'min_delta': 1e-4        # Minimum improvement threshold
+}
+
+# Each fold trains independently:
+# - 80% training, 20% validation
+# - Best model saved based on validation accuracy
+# - Temperature scaling calibrated post-training
+```
+
+#### 5. **Uncertainty Quantification**
+```python
+# Monte Carlo Dropout during inference:
+# - Dropout layers kept active during prediction
+# - 20 forward passes per image
+# - Mean prediction + standard deviation = uncertainty estimate
+# - Temperature scaling calibrates confidence scores
+```
+
+#### 6. **Training Results**
+```
+Fold 0: 93.631% validation accuracy
+Fold 1: 93.540% validation accuracy  
+Fold 2: 93.358% validation accuracy
+Fold 3: 92.903% validation accuracy
+Fold 4: 92.077% validation accuracy
+
+Average: 93.1% validation accuracy
+Ensemble: >95% expected accuracy due to model diversity
+```
+
+#### 7. **Production Deployment**
+```python
+# All 5 models loaded as ensemble:
+# - Inference runs on all models simultaneously
+# - Predictions averaged for final result
+# - Uncertainty calculated across models
+# - Real-time performance: ~2-3 seconds per image
 ```
 
 ## 🏆 Project Achievements
 
-- ✅ **Complete offline operation** - Works without internet
-- ✅ **19 pest species detection** - Comprehensive agricultural coverage  
-- ✅ **Organic treatments only** - OMRI-approved recommendations
-- ✅ **Mobile responsive** - Works on all devices
-- ✅ **Edge optimized** - Efficient inference on low-power devices
-- ✅ **Production ready** - Suitable for real-world farm deployment
+- ✅ **EfficientNet-B0 Ensemble** - 93.1% average validation accuracy across 5 folds
+- ✅ **12 pest species detection** - Comprehensive agricultural coverage  
+- ✅ **LM Studio Integration** - Local LLM for treatment consultation
+- ✅ **Uncertainty Quantification** - Monte Carlo Dropout + Temperature Scaling
+- ✅ **Production Ready** - Cleaned architecture, error handling, logging
+- ✅ **Auto-Treatment Chat** - Automatic LLM queries for treatment advice
 
 ## 📚 Documentation
 

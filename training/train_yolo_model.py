@@ -175,7 +175,7 @@ class YOLOv8PestTrainer:
             logger.info("🚀 Starting YOLOv8-nano training...")
             
             # Load YOLOv8-nano classification model
-            self.model = YOLO('yolov8n-cls.pt')  # nano classification model
+            self.model = YOLO('models/yolov8n-cls.pt')  # nano classification model
             
             # Training configuration
             data_yaml = self.dataset_dir / 'data.yaml'

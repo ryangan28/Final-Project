@@ -10,6 +10,15 @@ import json
 
 logger = logging.getLogger(__name__)
 
+# Try to import LM Studio integration
+try:
+    from .llm_integration import LMStudioIntegration
+    LLM_AVAILABLE = True
+    logger.info("LM Studio integration available")
+except ImportError as e:
+    logger.warning(f"LM Studio integration not available: {e}")
+    LLM_AVAILABLE = False
+
 class ChatInterface:
     """Conversational AI interface for farmer interaction."""
     
@@ -19,7 +28,17 @@ class ChatInterface:
         self.farmer_profile = {}
         self.context = {}
         
-        # Predefined responses for common scenarios
+        # Initialize LM Studio integration if available
+        self.llm = None
+        if LLM_AVAILABLE:
+            try:
+                self.llm = LMStudioIntegration()
+                logger.info("LM Studio integration initialized successfully")
+            except Exception as e:
+                logger.warning(f"Failed to initialize LM Studio: {e}")
+                self.llm = None
+        
+        # Predefined responses for common scenarios (fallback)
         self.responses = self._load_response_templates()
         
     def _load_response_templates(self):
@@ -52,13 +71,30 @@ class ChatInterface:
             ]
         }
     
-    def process_message(self, user_message, context=None):
+    def set_pest_context(self, detection_result):
+        """Set pest detection context for improved responses."""
+        if detection_result and detection_result.get('success'):
+            self.context['last_detection'] = {
+                'pest_type': detection_result.get('pest_type'),
+                'confidence': detection_result.get('confidence'),
+                'uncertainty': detection_result.get('uncertainty'),
+                'affected_crops': detection_result.get('affected_crops', []),
+                'harm_level': detection_result.get('harm_level'),
+                'detection_method': detection_result.get('detection_method')
+            }
+            logger.info(f"Updated pest context: {detection_result.get('pest_type')}")
+        
+    def clear_context(self):
+        """Clear conversation context."""
+        self.context = {}
+        logger.info("Conversation context cleared")
+
+    def process_message(self, user_message: str) -> str:
         """
         Process user message and generate appropriate response.
         
         Args:
             user_message (str): Message from the user
-            context (dict): Optional context from pest identification
             
         Returns:
             str: AI response to the user
@@ -66,15 +102,11 @@ class ChatInterface:
         try:
             logger.info(f"Processing message: {user_message[:50]}...")
             
-            # Update context if provided
-            if context:
-                self.context.update(context)
-            
             # Store conversation
             self.conversation_history.append({
                 'timestamp': datetime.now().isoformat(),
                 'user_message': user_message,
-                'context': context
+                'context': self.context.copy()
             })
             
             # Determine response type
@@ -93,7 +125,28 @@ class ChatInterface:
             return "I'm sorry, I encountered an error. Could you please try again?"
     
     def _generate_response(self, message):
-        """Generate contextual response based on user message."""
+        """Generate contextual response using LM Studio or fallback to rule-based."""
+        
+        # Try LM Studio first if available
+        if self.llm:
+            try:
+                # Get pest context if available
+                pest_context = self.context.get('last_detection', None)
+                
+                # Generate response using LM Studio
+                response = self.llm.generate_response(message, pest_context)
+                logger.info("Response generated using LM Studio")
+                return response
+                
+            except Exception as e:
+                logger.warning(f"LM Studio failed, falling back to rule-based: {e}")
+        
+        # Fallback to rule-based responses
+        logger.info("Using rule-based response generation")
+        return self._generate_rule_based_response(message)
+    
+    def _generate_rule_based_response(self, message):
+        """Generate response using rule-based pattern matching (fallback)."""
         message_lower = message.lower()
         
         # Greeting detection (use word boundaries to avoid false matches)

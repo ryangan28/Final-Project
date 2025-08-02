@@ -16,11 +16,14 @@ project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
 # Configure logging
+import os
+os.makedirs('logs', exist_ok=True)
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('pest_management.log'),
+        logging.FileHandler('logs/pest_management.log'),
         logging.StreamHandler()
     ]
 )
@@ -42,26 +45,14 @@ class PestManagementSystem:
         """Initialize the system components."""
         logger.info("Initializing Organic Farm Pest Management AI System")
         
-        # Import modules with error handling - prioritize improved models
+        # Import unified pest detector with all capabilities
         try:
-            from vision.improved_pest_detector import ImprovedPestDetector
-            self.pest_detector = ImprovedPestDetector()
-            logger.info("Improved pest detector with EfficientNet-B0 and uncertainty quantification loaded")
+            from vision.pest_detector import UnifiedPestDetector
+            self.pest_detector = UnifiedPestDetector()
+            logger.info("Unified pest detector loaded with all available backends")
         except ImportError as e:
-            logger.warning(f"Improved vision module not available: {e}")
-            try:
-                from vision.pest_detector_enhanced import EnhancedPestDetector
-                self.pest_detector = EnhancedPestDetector()
-                logger.info("Enhanced pest detector with YOLOv8 support loaded as fallback")
-            except ImportError as e2:
-                logger.warning(f"Enhanced vision module not available: {e2}")
-                try:
-                    from vision.pest_detector import PestDetector
-                    self.pest_detector = PestDetector()
-                    logger.info("Basic pest detector loaded as final fallback")
-                except ImportError as e3:
-                    logger.warning(f"Vision module not available: {e3}")
-                    self.pest_detector = None
+            logger.warning(f"Vision module not available: {e}")
+            self.pest_detector = None
             
         try:
             from treatments.recommendation_engine import TreatmentEngine
@@ -104,35 +95,51 @@ class PestManagementSystem:
                     'success': False
                 }
             
-            # Detect pest in image
-            pest_results = self.pest_detector.identify_pest(image_path)
+            # Detect pest in image using unified detector
+            pest_results = self.pest_detector.detect_pest(image_path)
             
-            if pest_results['confidence'] > 0.7:
+            # Check if detection was successful
+            if pest_results.get('success', False) and pest_results.get('confidence', 0) > 0.4:  # Lowered threshold
+                # Extract metadata if available
+                metadata = pest_results.get('metadata', {})
+                
                 # Get treatment category for treatment engine
-                treatment_category = pest_results.get('treatment_category', pest_results['pest_type'].title())
+                treatment_category = pest_results.get('pest_type', 'Unknown').title()
                 
                 # Get treatment recommendations
                 if self.treatment_engine:
                     treatments = self.treatment_engine.get_treatments(
                         treatment_category,
-                        pest_results['severity']
+                        'medium'  # Default severity
                     )
                 else:
                     treatments = {'message': 'Treatment engine not available'}
                 
                 return {
                     'pest_identified': True,
-                    'pest_type': pest_results['pest_type'],
-                    'confidence': pest_results['confidence'],
-                    'severity': pest_results['severity'],
+                    'pest_type': pest_results.get('pest_type', 'Unknown'),
+                    'confidence': pest_results.get('confidence', 0.0),
+                    'severity': 'medium',  # Default for now
+                    'uncertainty': pest_results.get('uncertainty', 0.0),
+                    'scientific_name': metadata.get('scientific_name', 'Unknown'),
+                    'common_names': metadata.get('common_names', []),
+                    'affected_crops': metadata.get('affected_crops', []),
+                    'is_beneficial': metadata.get('damage_type') == 'beneficial',
+                    'detection_method': pest_results.get('method', 'unknown'),
+                    'recommendation': f"Detected {pest_results.get('pest_type', 'pest')} with {pest_results.get('confidence', 0)*100:.1f}% confidence",
                     'treatments': treatments,
                     'success': True
                 }
             else:
+                # Use the detector's own error message or reason if available
+                message = pest_results.get('reason', pest_results.get('error', 'Pest identification uncertain. Please try with a clearer image.'))
+                
                 return {
                     'pest_identified': False,
-                    'confidence': pest_results['confidence'],
-                    'message': 'Pest identification uncertain. Please try with a clearer image.',
+                    'confidence': pest_results.get('confidence', 0.0),
+                    'uncertainty': pest_results.get('uncertainty', 1.0),
+                    'message': message,
+                    'detection_method': pest_results.get('method', 'unknown'),
                     'success': False
                 }
                 
@@ -157,8 +164,12 @@ class PestManagementSystem:
         """
         if not self.chat_interface:
             return "Chat interface not available. Please check system setup."
+        
+        # Set pest context if provided
+        if context:
+            self.chat_interface.set_pest_context(context)
             
-        return self.chat_interface.process_message(message, context)
+        return self.chat_interface.process_message(message)
     
     def optimize_for_edge(self):
         """Optimize models for edge deployment."""
