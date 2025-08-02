@@ -100,7 +100,7 @@ def create_app(pest_system):
             self.create_sidebar()
             
             # Main content area
-            page = st.session_state.get('current_page', 'Home')
+            page = st.session_state.get('page_selector', 'Home')
             
             if page == 'Home':
                 self.show_home_page()
@@ -128,26 +128,13 @@ def create_app(pest_system):
                 "About"
             ]
             
-            # Page selection
-            # Get current page from session state or default to 'Home'
-            current_page_state = st.session_state.get('current_page', 'Home')
-            
-            # Ensure the current page is in the list of valid pages
-            if current_page_state not in pages:
-                current_page_state = 'Home'
-                st.session_state.current_page = current_page_state
-            
-            # Create radio button with the current page selected
-            selected_page = st.sidebar.radio(
+            # Page selection - use the radio button's session state directly
+            st.sidebar.radio(
                 "Select Page", 
                 pages, 
-                index=pages.index(current_page_state),
+                index=0,  # Default to first page (Home)
                 key="page_selector"
             )
-            
-            # Update session state only if user manually selected a different page
-            if selected_page != current_page_state:
-                st.session_state.current_page = selected_page
             
             st.sidebar.markdown("---")
             
@@ -416,7 +403,7 @@ def create_app(pest_system):
                         col_a, col_b = st.columns(2)
                         with col_a:
                             if st.button("💬 Chat About Treatment"):
-                                st.session_state.current_page = 'Chat Assistant'
+                                st.session_state.page_selector = 'Chat Assistant'
                                 # Add the pest context to the chat
                                 if 'chat_history' not in st.session_state:
                                     st.session_state.chat_history = []
@@ -443,7 +430,7 @@ def create_app(pest_system):
                                 st.rerun()
                         with col_b:
                             if st.button("📚 View Treatment Library"):
-                                st.session_state.current_page = 'Treatment Library'
+                                st.session_state.page_selector = 'Treatment Library'
                                 st.success("🔄 Switching to Treatment Library...")
                                 st.rerun()
                     
@@ -751,11 +738,11 @@ def create_app(pest_system):
                 This project was developed by a collaborative team from **Singapore Institute of Technology (SIT)**:
                 
                 **Information and Communications Technology (ICT)**
-                - **Ryan Koo Wei Feng**
-                - **Farihin Fatten Binte Abdul Rahman**
-                - **Khoo Ye Chen**
-                - **Gan Kang Ting, Ryan**
-                - **Donovan Leong Jia Le**
+                - **Ryan Koo Wei Feng - Information Security (IS)**
+                - **Farihin Fatten Binte Abdul Rahman - Information Security (IS)**
+                - **Khoo Ye Chen - Software Engineering (SE)**
+                - **Gan Kang Ting, Ryan - Information Security (IS)**
+                - **Donovan Leong Jia Le - Applied Artificial Intelligence (AI)**
                 
                 **Project Scope:**
                 - 🎓 Final Project for Overseas Immersion Programme

@@ -1,53 +1,341 @@
 # 🌱 Organic Farm Pest Management AI System
 
-An intelligent pest management system designed for organic farmers, featuring EfficientNet-B0 ensemble classification with 92-93% accuracy, conversational AI powered by LM Studio, and comprehensive organic treatment recommendations. Built with a focus on production-ready deployment and offline-first capabilities.
+An intelligent, offline-first pest management system designed for organic farmers. Features computer vision pest identification using EfficientNet-B0 deep learning models, conversational AI powered by LM Studio, and comprehensive organic treatment recommend## 🙏 Acknowledgments
+
+### **Academic Institutions**
+- **Singapore Institute of Technology (SIT)** - Primary academic institution
+- **FPT University Da Nang** - Overseas Immersion Programme partner
+- **Academic supervisors and mentors** - Guidance and project oversight
+
+### **Technical Foundations**
+- **EfficientNet**: Efficient neural network architecture for computer vision
+- **LM Studio**: Local LLM inference platform
+- **Streamlit**: Rapid web application development framework
+- **PyTorch**: Deep learning framework and ecosystem
+
+### **Community Support**
+- **Open-source community contributors** - Libraries, frameworks, and tools
+- **Organic Farming Community** - Domain expertise and testing feedback
+- **Agricultural extension services** - Real-world validation and requirementsthat maintain OMRI certification standards.
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-```bash
-# Python 3.8+ required
-python --version
-
-# LM Studio (optional) - for enhanced chat capabilities
-# Download from https://lmstudio.ai/
-```
+- **Python 3.8+** (Required)
+- **LM Studio** (Optional) - For enhanced conversational AI capabilities
+  - Download from [https://lmstudio.ai/](https://lmstudio.ai/)
 
 ### Installation & Setup
 ```bash
+# Clone the repository
+git clone https://github.com/ryangan28/Final-Project.git
+cd Final-Project
+
 # Install dependencies
 pip install -r requirements.txt
 
-# Run the system
-streamlit run start.py
+# Launch the application
+python start.py
 ```
 
-### LM Studio Setup (Optional)
-1. Download and install LM Studio
-2. Download a model (recommended: Llama-2-7B-Chat-GGUF)
-3. Start local server on http://localhost:1234
-4. The system will automatically detect and use LM Studio
+The application will automatically:
+- Check dependencies and install missing packages
+- Launch the Streamlit web interface
+- Detect and integrate with LM Studio if available
 
-## 🎯 Features
+### LM Studio Setup (Optional but Recommended)
+1. Download and install [LM Studio](https://lmstudio.ai/)
+2. Download a compatible model (recommended: Llama-2-7B-Chat-GGUF or similar)
+3. Start the local server on `http://localhost:1234`
+4. The system will automatically detect and integrate with LM Studio for enhanced chat capabilities
 
-### ✅ Core Capabilities
-- **🔍 EfficientNet-B0 Ensemble Detection**: 5-model ensemble with 92-93% validation accuracy
-- **🤖 LM Studio Integration**: Local LLM for advanced conversational AI
-- **🌱 Organic Treatment Recommendations**: OMRI-approved treatments with IPM approach
-- **📱 Mobile-Friendly Interface**: Responsive Streamlit web application
-- **🔬 Uncertainty Quantification**: Monte Carlo Dropout + Temperature Scaling
-- **⚡ Production Ready**: Cleaned architecture with comprehensive error handling
+## ✨ Key Features
 
-### 🐛 Supported Pests (12 Classes)
-- **Beneficial**: Ants, Bees, Earthworms
-- **Direct Damage**: Beetles, Caterpillars, Grasshoppers, Moths, Slugs, Snails, Weevils
-- **Mixed Impact**: Earwigs, Wasps
-- **All Categories**: Scientific names, damage types, affected crops, detection features
+### 🔍 Advanced Pest Detection
+- **EfficientNet-B0 Deep Learning Model** - Trained on 12 common farm pests
+- **Uncertainty Quantification** - Monte Carlo Dropout + Temperature Scaling for confidence scoring
+- **Graceful Degradation** - Multiple fallback modes ensure reliability
+- **Real-time Processing** - Instant analysis of uploaded images
 
-## 📁 Project Structure
+### 🤖 Intelligent Chat Assistant
+- **LM Studio Integration** - Local LLM for private, offline conversations
+- **Agricultural Domain Expertise** - Specialized prompts for farming scenarios
+- **Context-Aware Responses** - Integrates pest identification results with treatment advice
+- **Fallback Support** - Works with or without LM Studio
+
+### 🌱 Organic Treatment Library
+- **OMRI-Approved Solutions** - Only organic-certified treatments
+- **IPM Methodology** - Integrated Pest Management principles
+- **Severity-Based Recommendations** - Scaled responses based on infestation level
+- **Prevention Strategies** - Long-term management approaches
+
+### 📱 User-Friendly Interface
+- **Streamlit Web Application** - Modern, responsive design
+- **Mobile-Friendly** - Works on phones, tablets, and desktops
+- **Offline-First Design** - Core functionality works without internet
+- **Progress Indicators** - Real-time feedback during processing
+
+## 🐛 Supported Pest Types (12 Classes)
+
+### Beneficial Insects
+- **Ants** - Usually beneficial soil aerators
+- **Bees** - Essential pollinators (identification for protection)
+- **Earthworms** - Soil health indicators
+
+### Crop Pests
+- **Beetles** - Various species affecting roots and foliage
+- **Caterpillars** - Leaf-eating larvae of moths and butterflies
+- **Grasshoppers** - Foliage damage and crop destruction
+- **Moths** - Adult stage of caterpillars, indicator species
+- **Slugs** - Soft-bodied mollusks damaging seedlings
+- **Snails** - Shell-bearing mollusks affecting tender plants
+- **Weevils** - Specialized beetles targeting specific crops
+
+### Mixed Impact
+- **Earwigs** - Can be both beneficial and pest
+- **Wasps** - Predatory insects with complex ecosystem roles
+
+## � Project Structure
 
 ```
-├── 📄 main.py                 # Main application entry point
+├── 📄 main.py                 # Core system orchestrator
+├── 🚀 start.py               # Smart application launcher
+├── 📋 requirements.txt        # Python dependencies
+├── 📖 README.md              # This file
+│
+├── �📱 mobile/                # Web interface (Streamlit)
+│   ├── app_interface.py      # Main UI components
+│   └── __init__.py
+│
+├── 👁️ vision/                # Computer vision module
+│   ├── pest_detector.py      # EfficientNet-B0 implementation
+│   └── __init__.py
+│
+├── 🌱 treatments/            # Treatment recommendation engine
+│   ├── recommendation_engine.py  # Organic treatment database
+│   └── __init__.py
+│
+├── 💬 conversation/          # Chat system
+│   ├── llm_integration.py    # LM Studio integration
+│   ├── chat_interface.py     # Chat UI components
+│   └── __init__.py
+│
+├── 🔧 edge/                  # Edge optimization (future)
+│   ├── model_optimizer.py    # ONNX conversion utilities
+│   └── __init__.py
+│
+├── 🧪 tests/                 # Test suite
+│   └── test_system.py        # System integration tests
+│
+├── 📊 models/                # Pre-trained models
+│   ├── pest_classifier/      # EfficientNet-B0 weights
+│   │   └── weights/
+│   │       ├── best.pt       # Best performing model
+│   │       ├── last.pt       # Latest checkpoint
+│   │       └── epoch*.pt     # Training checkpoints
+│   ├── yolov8n-cls.pt       # YOLOv8 classifier (backup)
+│   └── optimized/           # Edge-optimized models
+│
+├── 📂 datasets/             # Training datasets (12 pest classes)
+│   ├── ants/
+│   ├── bees/
+│   ├── beetles/
+│   └── ... (9 more classes)
+│
+├── 🏋️ training/             # Model training scripts
+│   ├── improved_train.py     # Main training pipeline
+│   ├── evaluate_model.py     # Model evaluation
+│   └── datasets_split/       # Train/validation splits
+│
+├── 📝 logs/                 # Application logs
+│   └── pest_management.log
+│
+├── 🌐 locales/              # Internationalization
+│   └── en.json
+│
+└── 📚 docs/                 # Documentation
+    └── Final Project Topic - Organic Farm Pest Management AI System.md
+```
+
+## 🛠️ Technical Architecture
+
+### Machine Learning Stack
+- **Primary Model**: EfficientNet-B0 with custom classification head
+- **Framework**: PyTorch 2.0+ with torchvision
+- **Uncertainty Quantification**: Monte Carlo Dropout + Temperature Scaling
+- **Fallback Models**: YOLOv8 classification, basic ML classifiers
+- **Model Format**: PyTorch (.pt) with ONNX export capability
+
+### Web Application
+- **Framework**: Streamlit 1.28+
+- **Image Processing**: PIL (Pillow) for preprocessing
+- **UI Components**: Custom CSS styling with responsive design
+- **Session Management**: Streamlit session state for user experience
+
+### Conversational AI
+- **Integration**: LM Studio API client
+- **Local Inference**: Supports Llama-2, Code Llama, and compatible models
+- **Fallback**: Rule-based responses when LLM unavailable
+- **Context**: Pest identification results integrated into conversations
+
+### Dependencies Management
+- **Core Dependencies**: Streamlit, Pillow, NumPy (minimal install)
+- **Enhanced Features**: PyTorch, torchvision, scikit-learn (full ML stack)
+- **Optional Components**: ONNX runtime, OpenCV (edge optimization)
+- **Smart Installation**: `start.py` handles dependency checking and installation
+
+## � Usage Guide
+
+### Basic Pest Identification
+1. **Launch Application**: Run `python start.py`
+2. **Upload Image**: Navigate to "Pest Identification" and upload a clear photo
+3. **Get Results**: Receive instant identification with confidence scores
+4. **View Treatments**: Access organic treatment recommendations
+
+### Chat Assistant
+1. **Navigate to Chat**: Click "Chat Assistant" in the sidebar
+2. **Ask Questions**: Type natural language questions about pest management
+3. **Context Integration**: Previous identifications automatically inform responses
+4. **Treatment Guidance**: Get detailed organic farming advice
+
+### Treatment Library
+1. **Browse Treatments**: Access comprehensive organic treatment database
+2. **Filter by Pest**: View pest-specific recommendations
+3. **IPM Principles**: Learn integrated pest management strategies
+4. **Prevention Tips**: Access long-term management advice
+
+## 🧪 Testing
+
+Run the test suite to verify system functionality:
+
+```bash
+# Run all tests
+python -m pytest tests/ -v
+
+# Run specific test
+python tests/test_system.py
+```
+
+Tests cover:
+- Pest detection accuracy
+- Treatment recommendation engine
+- LM Studio integration
+- UI component functionality
+- Error handling and graceful degradation
+
+## ⚙️ Configuration
+
+### Environment Variables
+Create a `.env` file for custom configuration:
+
+```bash
+# LM Studio API Configuration
+LM_STUDIO_API_URL=http://localhost:1234/v1
+LM_STUDIO_MODEL=llama-2-7b-chat
+
+# Logging Configuration
+LOG_LEVEL=INFO
+LOG_FILE=logs/pest_management.log
+
+# Model Configuration
+MODEL_PATH=models/pest_classifier/weights/best.pt
+CONFIDENCE_THRESHOLD=0.7
+```
+
+### Customizing Models
+- Place custom trained models in `models/pest_classifier/weights/`
+- Update model paths in `vision/pest_detector.py`
+- Retrain using scripts in `training/` directory
+
+## 🌐 Deployment Options
+
+### Local Development
+```bash
+python start.py  # Launches on http://localhost:8501
+```
+
+### Edge Device Deployment
+```bash
+# Install with edge optimization
+python start.py --enhanced
+
+# Run with limited resources
+python start.py --console  # Command-line interface
+```
+
+### Cloud Deployment
+The application can be deployed on cloud platforms supporting Python and Streamlit:
+- **Streamlit Cloud**: Direct deployment from GitHub
+- **Heroku**: Use included `Procfile` (if available)
+- **Docker**: Container support for consistent deployment
+
+## 🤝 Contributing
+
+1. **Fork the Repository**
+2. **Create Feature Branch**: `git checkout -b feature/amazing-feature`
+3. **Commit Changes**: `git commit -m 'Add amazing feature'`
+4. **Push to Branch**: `git push origin feature/amazing-feature`
+5. **Open Pull Request**
+
+### Development Setup
+```bash
+# Install development dependencies
+pip install -r requirements.txt
+pip install pytest black flake8
+
+# Run code formatting
+black .
+
+# Run linting
+flake8 .
+
+# Run tests
+pytest tests/ -v
+```
+
+## � Development Team
+
+This project was developed by a collaborative team from **Singapore Institute of Technology (SIT)** as part of their Final Project for the Overseas Immersion Programme:
+
+### **Information and Communications Technology (ICT) Students**
+- **Ryan Koo Wei Feng** - Information Security (IS)
+- **Farihin Fatten Binte Abdul Rahman** - Information Security (IS)  
+- **Khoo Ye Chen** - Software Engineering (SE)
+- **Gan Kang Ting, Ryan** - Information Security (IS)
+- **Donovan Leong Jia Le** - Applied Artificial Intelligence (AI)
+
+### **Academic Collaboration**
+- 🏫 **Singapore Institute of Technology (SIT)**
+- 🎓 **FPT University Da Nang** (Overseas Immersion Programme)
+
+### **Project Highlights**
+- 🎓 Final Project for Overseas Immersion Programme
+- 🚀 Real-world agricultural technology application
+- 🤝 Interdisciplinary team approach (Software Engineering + Information Security + AI)
+- 🌏 International academic collaboration
+
+## �📄 License
+
+This project is developed for educational purposes as part of an Overseas Immersion Programme. Please respect academic integrity guidelines when using or referencing this code.
+
+## � Acknowledgments
+
+- **EfficientNet**: Efficient neural network architecture for computer vision
+- **LM Studio**: Local LLM inference platform
+- **Streamlit**: Rapid web application development framework
+- **PyTorch**: Deep learning framework and ecosystem
+- **Organic Farming Community**: Domain expertise and testing feedback
+
+## 📞 Support
+
+For issues, questions, or contributions:
+- **GitHub Issues**: Report bugs and request features
+- **Documentation**: Check `docs/` directory for detailed information
+- **Logs**: Review `logs/pest_management.log` for troubleshooting
+
+---
+
+**🌱 Supporting organic farmers with AI-powered pest management solutions**
 ├── 🚀 start.py               # Universal starter with dependency management
 ├── 📋 requirements.txt       # Project dependencies
 │
