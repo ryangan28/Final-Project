@@ -1,0 +1,69 @@
+{
+  "mean_accuracy": 93.1740230810921,
+  "std_accuracy": 1.3246596723694457,
+  "fold_accuracies": [
+    93.72156505914468,
+    92.53867151956324,
+    95.26842584167424,
+    93.08462238398545,
+    91.2568306010929
+  ],
+  "config": {
+    "description": "Anti-overfitting configuration - prevents model from memorizing",
+    "image_size": 224,
+    "batch_size": 32,
+    "num_epochs": 50,
+    "learning_rate": 5e-05,
+    "weight_decay": 0.001,
+    "patience": 7,
+    "min_delta": 0.001,
+    "num_folds": 5,
+    "dropout_rate": 0.5,
+    "label_smoothing": 0.1,
+    "mixup_alpha": 0.2,
+    "cutmix_alpha": 1.0,
+    "scheduler_patience": 3,
+    "scheduler_factor": 0.3,
+    "device": "cuda"
+  },
+  "class_mapping": {
+    "classes": [
+      "ants",
+      "bees",
+      "beetle",
+      "catterpillar",
+      "earthworms",
+      "earwig",
+      "grasshopper",
+      "moth",
+      "slug",
+      "snail",
+      "wasp",
+      "weevil"
+    ],
+    "class_to_idx": {
+      "ants": 0,
+      "bees": 1,
+      "beetle": 2,
+      "catterpillar": 3,
+      "earthworms": 4,
+      "earwig": 5,
+      "grasshopper": 6,
+      "moth": 7,
+      "slug": 8,
+      "snail": 9,
+      "wasp": 10,
+      "weevil": 11
+    },
+    "num_classes": 12
+  },
+  "anti_overfitting_measures": {
+    "weight_decay": 0.001,
+    "dropout_rate": 0.5,
+    "label_smoothing": 0.1,
+    "mixup_alpha": 0.2,
+    "frozen_layers": true,
+    "gradient_clipping": true,
+    "batch_normalization": true
+  }
+}
