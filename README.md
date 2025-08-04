@@ -11,8 +11,8 @@ An intelligent, offline-first AI system for organic farmers that identifies agri
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/organic-pest-management-ai.git
-cd organic-pest-management-ai
+git clone https://github.com/ryangan28/Final-Project.git
+cd Final-Project
 
 # Install dependencies
 pip install -r requirements.txt
@@ -29,10 +29,11 @@ The application will automatically check dependencies and launch at `http://loca
 ## ✨ Key Features
 
 ### 🔍 Advanced Pest Detection
-- **EfficientNet-B0 Deep Learning**: 93.1% accuracy with ensemble of 5 models
-- **Uncertainty Quantification**: Monte Carlo Dropout for confidence estimation
+- **EfficientNet-B0 Deep Learning**: High accuracy with ensemble of 5 models and uncertainty quantification
+- **YOLOv8-nano Integration**: Fast object detection with pest-specific training
+- **Multi-Backend System**: Graceful degradation from ML to simulation modes
 - **12 Pest Classes**: Comprehensive coverage of common agricultural pests
-- **Real-time Processing**: <200ms inference time per image
+- **Real-time Processing**: Optimized inference with CPU/GPU support
 
 ### 💬 Conversational AI Assistant
 - **LM Studio Integration**: Local LLM for privacy-preserving conversations
@@ -72,7 +73,7 @@ The application will automatically check dependencies and launch at `http://loca
 ## 🏗️ Architecture
 
 ```
-organic-pest-management-ai/
+Final-Project/
 ├── 📱 main.py                    # Main application orchestrator
 ├── 🚀 start.py                   # Smart launcher with dependency management
 ├── 📋 requirements.txt           # Python dependencies
@@ -95,30 +96,91 @@ organic-pest-management-ai/
 │
 ├── 🧠 models/                    # Trained Models
 │   ├── improved/                 # EfficientNet-B0 ensemble models
-│   └── optimized/                # Edge-optimized versions
+│   ├── improved_quick/           # Quick training variants
+│   ├── optimized/                # Edge-optimized versions
+│   ├── pest_classifier/          # Legacy classifiers
+│   ├── pest_classifier2/         # Alternative classifiers
+│   ├── pest_model_yolov8n.pt     # YOLOv8-nano pest model
+│   └── yolov8n-cls.pt           # Base YOLOv8 classification model
 │
 ├── 🎓 training/                  # Training Pipeline
 │   ├── improved_train.py         # EfficientNet training script
-│   └── evaluate_model.py         # Model evaluation suite
+│   ├── improved_train.ipynb      # Jupyter notebook for training
+│   ├── quick_improved_train.py   # Fast training script
+│   ├── quick_train.py            # Legacy quick training
+│   ├── train_yolo_model.py       # YOLOv8 training pipeline
+│   ├── evaluate_model.py         # Model evaluation suite
+│   └── datasets_split/           # Training data splits
+│
+├── 🗂️ datasets/                  # Pest Image Dataset
+│   ├── ants/                     # Ant species images
+│   ├── bees/                     # Bee species images
+│   ├── beetle/                   # Beetle species images
+│   ├── catterpillar/             # Caterpillar images (note: contains typo)
+│   ├── earthworms/               # Earthworm images
+│   ├── earwig/                   # Earwig images
+│   ├── grasshopper/              # Grasshopper images
+│   ├── moth/                     # Moth species images
+│   ├── slug/                     # Slug images
+│   ├── snail/                    # Snail images
+│   ├── wasp/                     # Wasp species images
+│   └── weevil/                   # Weevil images
+│
+├── 📚 docs/                      # Documentation
+│   └── Final Project Topic - Organic Farm Pest Management AI System.md
+│
+├── 🌍 locales/                   # Internationalization
+│   └── en.json                   # English language strings
+│
+├── 📝 logs/                      # Application Logs
+│   └── pest_management.log       # System operation logs
 │
 └── 🧪 tests/                     # Test Suite
     └── test_system.py            # Comprehensive system tests
 ```
 
+## 🔧 Technical Requirements
+
+### System Requirements
+- **Python**: 3.8 or higher
+- **Operating System**: Windows, macOS, Linux
+- **Memory**: 4GB RAM minimum (8GB recommended for training)
+- **Storage**: 2GB free space for models and datasets
+- **GPU**: Optional (CUDA-compatible for enhanced performance)
+
+### Core Dependencies
+```
+streamlit>=1.28.0          # Web interface
+Pillow>=9.5.0              # Image processing  
+numpy>=1.24.0              # Numerical computing
+torch>=2.0.0               # Deep learning framework
+torchvision>=0.15.0        # Computer vision utilities
+ultralytics>=8.0.0         # YOLOv8 models
+scikit-learn>=1.3.0        # ML utilities
+```
+
+### Optional Dependencies
+```
+onnx>=1.14.0               # Model optimization
+psutil>=5.9.0              # System monitoring
+python-dotenv>=1.0.0       # Environment variables
+```
+
 ## 🔧 Technical Details
 
 ### Machine Learning Stack
-- **Architecture**: EfficientNet-B0 with custom classification head
-- **Training**: 5-fold cross-validation with stratified splits
-- **Augmentations**: Agricultural-specific transformations
-- **Uncertainty**: Monte Carlo Dropout + Temperature Scaling
-- **Performance**: 93.1% accuracy (±0.57% std across folds)
+- **Primary Architecture**: EfficientNet-B0 with custom classification head and ensemble methodology
+- **Secondary Detection**: YOLOv8-nano for fast object detection and classification  
+- **Training Strategy**: 5-fold cross-validation with stratified splits and agricultural-specific augmentations
+- **Uncertainty Estimation**: Monte Carlo Dropout with temperature scaling for confidence assessment
+- **Fallback System**: Multi-tiered detection with graceful degradation capabilities
 
 ### System Capabilities
-- **Offline-First**: Full functionality without internet
-- **Multi-Backend**: Graceful degradation across detection methods
-- **Lightweight Mode**: Runs on CPU with reduced dependencies
+- **Offline-First**: Full functionality without internet connection
+- **Multi-Backend Detection**: EfficientNet ensemble → YOLOv8 → Basic ML → Simulation fallback
+- **Lightweight Mode**: CPU-only operation with reduced dependencies
 - **Enhanced Mode**: GPU acceleration with full ML stack
+- **Smart Launcher**: Automatic dependency checking and environment setup
 
 ## 💻 Installation Options
 
@@ -136,11 +198,30 @@ python start.py --enhanced
 
 ### Development Installation
 ```bash
-git clone <repository>
-cd organic-pest-management-ai
+git clone https://github.com/ryangan28/Final-Project.git
+cd Final-Project
 pip install -r requirements.txt
 python start.py --setup
 ```
+
+## 🗂️ Dataset Information
+
+The system uses a comprehensive agricultural pest dataset organized into 12 categories:
+
+- **ants** - Garden ants, worker ants, fire ants
+- **bees** - Honey bees, worker bees, bumble bees *(beneficial)*
+- **beetle** - Flea beetles, Japanese beetles, Colorado potato beetles
+- **catterpillar** - Hornworms, cabbage worms, armyworms *(note: folder name contains typo)*
+- **earthworms** - Garden earthworms, red worms *(beneficial)*
+- **earwig** - European earwigs, common earwigs
+- **grasshopper** - Locusts, field grasshoppers
+- **moth** - Codling moths, cabbage moths, corn borers
+- **slug** - Garden slugs, gray field slugs
+- **snail** - Garden snails, brown garden snails
+- **wasp** - Paper wasps, yellow jackets, parasitic wasps
+- **weevil** - Boll weevils, rice weevils, grain weevils
+
+Each category contains representative images for training and testing the pest detection models.
 
 ## 🎯 Usage Guide
 
@@ -167,9 +248,14 @@ python start.py --setup
 python training/quick_improved_train.py
 ```
 
-### Full Training (Production)
+### Full Training (Production)  
 ```bash
 python training/improved_train.py
+```
+
+### YOLOv8 Training
+```bash
+python training/train_yolo_model.py
 ```
 
 ### Evaluate Models
@@ -179,13 +265,16 @@ python training/evaluate_model.py
 
 ## 📊 Performance Metrics
 
-| Metric | Value |
-|--------|-------|
-| Accuracy | 93.1% ± 0.57% |
-| Inference Time | <200ms |
-| Model Size | ~17MB per model |
-| Ensemble Size | 5 models |
-| Parameters | 4.7M per model |
+The system provides multiple detection backends with varying performance characteristics:
+
+| Backend | Accuracy | Inference Time | Model Size | Use Case |
+|---------|----------|----------------|------------|----------|
+| EfficientNet Ensemble | High | ~200-500ms | ~85MB (5 models) | Production |
+| YOLOv8-nano | Good | ~50-100ms | ~6MB | Edge/Mobile |
+| Basic ML Fallback | Moderate | ~10-50ms | Minimal | Emergency |
+| Simulation Mode | N/A | <10ms | None | Testing |
+
+*Note: Performance metrics vary based on hardware and image complexity*
 
 ## 🌐 API Usage
 
@@ -208,10 +297,15 @@ result = detector.detect_pest("path/to/image.jpg")
 # Result structure:
 {
     'success': True,
-    'pest_type': 'aphids',
+    'pest_type': 'beetle',
     'confidence': 0.92,
     'uncertainty': 0.05,
-    'metadata': {...}
+    'backend_used': 'efficientnet_ensemble',
+    'metadata': {
+        'detection_time': 0.234,
+        'model_version': 'improved_fold_0',
+        'image_size': [224, 224]
+    }
 }
 ```
 
@@ -254,9 +348,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Issues**: Please use the GitHub Issues page
-- **Documentation**: Check the `docs/` directory
-- **Logs**: Review `logs/pest_management.log` for troubleshooting
+- **Issues**: Please use the [GitHub Issues page](https://github.com/ryangan28/Final-Project/issues)
+- **Documentation**: Check the `docs/` directory for detailed project information
+- **Logs**: Review `logs/pest_management.log` for troubleshooting and system monitoring
+- **Dataset**: Ensure the `datasets/` folder contains all 12 pest categories before training
 
 ---
 
