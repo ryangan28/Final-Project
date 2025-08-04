@@ -99,8 +99,17 @@ def create_app(pest_system):
             # Sidebar navigation
             self.create_sidebar()
             
-            # Main content area
+            # Determine which page to show
             page = st.session_state.get('page_selector', 'Home')
+            
+            # Override page if we have navigation triggers
+            if st.session_state.get('navigate_to_chat', False):
+                page = 'Chat Assistant'
+                st.session_state.navigate_to_chat = False  # Clear the trigger
+                
+            if st.session_state.get('navigate_to_library', False):
+                page = 'Treatment Library'
+                st.session_state.navigate_to_library = False  # Clear the trigger
             
             if page == 'Home':
                 self.show_home_page()
@@ -403,7 +412,8 @@ def create_app(pest_system):
                         col_a, col_b = st.columns(2)
                         with col_a:
                             if st.button("💬 Chat About Treatment"):
-                                st.session_state.page_selector = 'Chat Assistant'
+                                # Instead of directly setting page_selector, use a trigger
+                                st.session_state.navigate_to_chat = True
                                 # Add the pest context to the chat
                                 if 'chat_history' not in st.session_state:
                                     st.session_state.chat_history = []
@@ -418,10 +428,11 @@ def create_app(pest_system):
                                 st.session_state.chat_history.append(("System", f"🔄 Switching to Chat Assistant for {pest_name} treatment discussion..."))
                                 st.session_state.chat_history.append(("User", treatment_question))
                                 
-                                # Get AI response for treatment
+                                # Get AI response for treatment (do this before rerun)
                                 try:
-                                    ai_response = self.system.chat_with_system(treatment_question, results)
-                                    st.session_state.chat_history.append(("Assistant", ai_response))
+                                    with st.spinner("🤖 Generating treatment recommendations..."):
+                                        ai_response = self.system.chat_with_system(treatment_question, results)
+                                        st.session_state.chat_history.append(("Assistant", ai_response))
                                 except Exception as e:
                                     error_msg = f"I apologize, but I encountered an error getting treatment recommendations: {str(e)}"
                                     st.session_state.chat_history.append(("Assistant", error_msg))
@@ -430,7 +441,7 @@ def create_app(pest_system):
                                 st.rerun()
                         with col_b:
                             if st.button("📚 View Treatment Library"):
-                                st.session_state.page_selector = 'Treatment Library'
+                                st.session_state.navigate_to_library = True
                                 st.success("🔄 Switching to Treatment Library...")
                                 st.rerun()
                     

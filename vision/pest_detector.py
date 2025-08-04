@@ -54,8 +54,13 @@ except ImportError as e:
     logger.warning(f"OpenCV not available: {e}")
     ML_CAPABILITIES['opencv'] = False
 
-# YOLO removed - focusing on EfficientNet only
-ML_CAPABILITIES['yolo'] = False
+try:
+    from ultralytics import YOLO
+    ML_CAPABILITIES['yolo'] = True
+    logger.info("YOLO (ultralytics) loaded successfully")
+except ImportError as e:
+    logger.warning(f"YOLO not available: {e}")
+    ML_CAPABILITIES['yolo'] = False
 
 # Determine overall ML availability
 ML_AVAILABLE = ML_CAPABILITIES['pytorch'] and ML_CAPABILITIES['pil']
@@ -227,6 +232,7 @@ class UnifiedPestDetector:
         
         # Detection backends
         self.efficientnet_models = []
+        self.yolo_model = None
         self.basic_model = None
         self.class_mapping = {}
         
@@ -245,7 +251,11 @@ class UnifiedPestDetector:
         if ML_CAPABILITIES['pytorch']:
             self._load_efficientnet_ensemble()
         
-        # 2. Basic CNN (Fallback)
+        # 2. YOLO Model (Secondary)
+        if ML_CAPABILITIES['yolo']:
+            self._load_yolo_model()
+        
+        # 3. Basic CNN (Tertiary)
         if ML_CAPABILITIES['pytorch']:
             self._load_basic_model()
     
@@ -296,6 +306,31 @@ class UnifiedPestDetector:
             import traceback
             logger.error(f"Traceback: {traceback.format_exc()}")
     
+    def _load_yolo_model(self):
+        """Load YOLO model as secondary detection backend."""
+        try:
+            # Try trained pest-specific YOLO model first
+            pest_yolo_path = self.model_path / "pest_model_yolov8n.pt"
+            if pest_yolo_path.exists():
+                from ultralytics import YOLO
+                self.yolo_model = YOLO(str(pest_yolo_path))
+                logger.info(f"Loaded trained YOLO pest model: {pest_yolo_path}")
+                return
+            
+            # Fallback to pre-trained YOLO classification model
+            base_yolo_path = self.model_path / "yolov8n-cls.pt"
+            if base_yolo_path.exists():
+                from ultralytics import YOLO
+                self.yolo_model = YOLO(str(base_yolo_path))
+                logger.info(f"Loaded base YOLO classification model: {base_yolo_path}")
+                return
+            
+            logger.info("No YOLO models found - YOLO backend unavailable")
+            
+        except Exception as e:
+            logger.error(f"Failed to load YOLO model: {e}")
+            self.yolo_model = None
+    
     def _load_basic_model(self):
         """Load basic CNN model as final ML fallback."""
         try:
@@ -339,6 +374,8 @@ class UnifiedPestDetector:
         backends = []
         if self.efficientnet_models:
             backends.append("EfficientNet-B0 Ensemble")
+        if self.yolo_model:
+            backends.append("YOLO Classification")
         if self.basic_model:
             backends.append("Basic CNN")
         return backends
@@ -365,6 +402,8 @@ class UnifiedPestDetector:
             # Use EfficientNet ensemble if available
             if self.efficientnet_models:
                 return self._detect_with_efficientnet(image)
+            elif self.yolo_model:
+                return self._detect_with_yolo(image)
             elif self.basic_model:
                 return self._detect_with_basic(image)
             else:
@@ -443,6 +482,76 @@ class UnifiedPestDetector:
         except Exception as e:
             logger.error(f"EfficientNet detection failed: {e}")
             return self._create_error_result(f"EfficientNet error: {str(e)}")
+    
+    def _detect_with_yolo(self, image):
+        """Detect pest using YOLO classification model."""
+        try:
+            # Save image temporarily for YOLO processing
+            import tempfile
+            with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp_file:
+                image.save(tmp_file.name, format='JPEG')
+                temp_path = tmp_file.name
+            
+            try:
+                # Run YOLO prediction
+                results = self.yolo_model(temp_path, verbose=False)
+                
+                # Extract prediction results
+                result = results[0]
+                
+                # Get class probabilities
+                if hasattr(result, 'probs') and result.probs is not None:
+                    probs = result.probs.data.cpu().numpy()
+                    predicted_class = int(result.probs.top1)
+                    confidence = float(result.probs.top1conf)
+                    
+                    # Get class names from YOLO model
+                    if hasattr(self.yolo_model, 'names'):
+                        class_names = list(self.yolo_model.names.values())
+                    else:
+                        # Fallback to our pest database
+                        class_names = list(self.PEST_DATABASE.keys())
+                    
+                    if predicted_class < len(class_names):
+                        predicted_pest = class_names[predicted_class]
+                    else:
+                        predicted_pest = 'unknown'
+                    
+                    # Apply confidence threshold
+                    success = confidence >= self.confidence_threshold
+                    
+                    result_dict = {
+                        'success': success,
+                        'pest_type': predicted_pest if success else 'unknown',
+                        'confidence': confidence,
+                        'uncertainty': 1.0 - confidence,  # Simple uncertainty estimate
+                        'method': 'YOLO Classification',
+                        'all_probabilities': {class_names[i]: float(probs[i]) 
+                                            for i in range(min(len(class_names), len(probs)))},
+                        'metadata': self._get_pest_metadata(predicted_pest) if success else None,
+                        'thresholds': {
+                            'confidence': self.confidence_threshold,
+                            'uncertainty': self.uncertainty_threshold
+                        }
+                    }
+                    
+                    logger.info(f"YOLO detection: {predicted_pest} (conf: {confidence:.3f})")
+                    return result_dict
+                    
+                else:
+                    return self._create_error_result("YOLO model returned no classification results")
+                    
+            finally:
+                # Clean up temporary file
+                import os
+                try:
+                    os.unlink(temp_path)
+                except OSError:
+                    pass
+                    
+        except Exception as e:
+            logger.error(f"YOLO detection failed: {e}")
+            return self._create_error_result(f"YOLO error: {str(e)}")
     
     def _detect_with_basic(self, image):
         """Detect pest using basic CNN classifier."""
@@ -524,6 +633,7 @@ class UnifiedPestDetector:
             'available_backends': self._get_available_backends(),
             'ml_capabilities': ML_CAPABILITIES,
             'efficientnet_models': len(self.efficientnet_models),
+            'yolo_model_available': self.yolo_model is not None,
             'basic_model_available': self.basic_model is not None,
             'supported_pests': list(self.PEST_DATABASE.keys()),
             'thresholds': {
