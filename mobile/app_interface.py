@@ -253,11 +253,13 @@ class PestIdentificationPage:
         col1, col2 = st.columns([1, 1])
         
         with col1:
-            self._display_photo_tips()
             self._display_upload_section()
         
         with col2:
             self._display_results()
+        
+        # Photography Tips section below both columns
+        self._display_photography_tips()
     
     def _display_model_selection(self):
         """Display model selection dropdown."""
@@ -323,24 +325,7 @@ class PestIdentificationPage:
         
         st.markdown("---")
     
-    def _display_photo_tips(self):
-        st.markdown("### 📸 Photography Tips")
-        st.markdown("For best identification results, follow these photography guidelines:")
-        
-        demo_images = ImageHandler.get_demo_images()
-        ImageHandler.display_demo_images(demo_images)
-        
-        st.markdown("""
-        **Tips for Clear Photos:**
-        - 📱 Hold device steady
-        - 🔍 Get close to the pest
-        - ☀️ Use good lighting
-        - 🎯 Focus on the pest clearly
-        - 📐 Include size reference if possible
-        """)
-    
     def _display_upload_section(self):
-        st.markdown("---")
         st.markdown("### 📸 Upload Your Own Image")
         
         uploaded_file = st.file_uploader(
@@ -355,8 +340,6 @@ class PestIdentificationPage:
             
             if st.button("🔬 Analyze Image", type="primary"):
                 self._process_image_analysis(uploaded_file)
-        
-        self._display_photography_tips()
     
     def _process_image_analysis(self, uploaded_file):
         with st.spinner("Analyzing image for pest identification..."):
@@ -371,9 +354,18 @@ class PestIdentificationPage:
     
     def _display_photography_tips(self):
         st.markdown("### 📷 Photography Tips")
+        st.markdown("For best identification results, follow these photography guidelines:")
+        
+        demo_images = ImageHandler.get_demo_images()
+        ImageHandler.display_demo_images(demo_images)
+        
         st.info("""
-        **For Best Results:**
-        - Use good lighting (natural light preferred)
+        **Tips for Clear Photos:**
+        - 📱 Hold device steady
+        - 🔍 Get close to the pest
+        - ☀️ Use good lighting (natural light preferred)
+        - 🎯 Focus on the pest clearly
+        - 📐 Include size reference if possible
         - Take close-up shots of the pest
         - Include any visible damage
         - Keep the image in focus
@@ -454,6 +446,7 @@ class PestIdentificationPage:
         with col_b:
             if st.button("📚 View Treatment Library"):
                 st.session_state.navigate_to_library = True
+                st.session_state.library_pest_context = results.get('pest_type')
                 st.success("🔄 Switching to Treatment Library...")
                 st.rerun()
     
@@ -548,15 +541,25 @@ class TreatmentLibraryPage:
     
     def display(self):
         st.markdown('<h2 class="section-header">📚 Organic Treatment Library</h2>', unsafe_allow_html=True)
+        
+        # Check if we have pest context from identification
+        pest_context = st.session_state.get('library_pest_context')
+        if pest_context:
+            st.info(f"🎯 Showing treatments for recently identified pest: **{pest_context}**")
+            # Clear the context after showing it once
+            if st.button("🔄 Browse All Pests"):
+                st.session_state.library_pest_context = None
+                st.rerun()
+        
         col1, col2 = st.columns([1, 2])
         
         with col1:
-            selected_category, selected_pest = self._display_selection_panel()
+            selected_category, selected_pest = self._display_selection_panel(pest_context)
         
         with col2:
             self._display_treatment_details(selected_category, selected_pest)
     
-    def _display_selection_panel(self):
+    def _display_selection_panel(self, pest_context=None):
         st.markdown("### 🎯 Treatment Categories")
         
         categories = {
@@ -574,23 +577,89 @@ class TreatmentLibraryPage:
             "Thrips", "Colorado Potato Beetle", "Cucumber Beetle", "Flea Beetle"
         ]
         
-        selected_pest = st.selectbox("Pest Type:", pest_types)
+        # If we have pest context, try to find and pre-select it
+        default_index = 0
+        if pest_context:
+            # Create a mapping from detected pest names to library entries
+            pest_mapping = {
+                'ants': 'Aphids',  # Closest match in available types
+                'bees': 'Aphids',  # Beneficial insects, but show organic-friendly options
+                'beetle': 'Colorado Potato Beetle',
+                'caterpillars': 'Caterpillars',
+                'catterpillar': 'Caterpillars',
+                'earthworms': 'Aphids',  # Beneficial, show general organic options
+                'earwig': 'Flea Beetle',  # Similar pest category
+                'grasshopper': 'Caterpillars',  # Similar damage patterns
+                'moth': 'Caterpillars',  # Moth larvae are caterpillars
+                'slug': 'Aphids',  # Show general organic pest control
+                'snail': 'Aphids',  # Show general organic pest control
+                'wasp': 'Aphids',  # Often beneficial, show organic-friendly options
+                'weevil': 'Cucumber Beetle'  # Similar beetle family
+            }
+            
+            # Try direct mapping first
+            pest_lower = pest_context.lower()
+            if pest_lower in pest_mapping:
+                target_pest = pest_mapping[pest_lower]
+                try:
+                    default_index = pest_types.index(target_pest)
+                except ValueError:
+                    pass
+            else:
+                # Try to find the pest in our list (case-insensitive matching)
+                for i, pest in enumerate(pest_types):
+                    if pest.lower() in pest_lower or pest_lower in pest.lower():
+                        default_index = i
+                        break
+        
+        selected_pest = st.selectbox("Pest Type:", pest_types, index=default_index)
         
         return selected_category, selected_pest
     
     def _display_treatment_details(self, selected_category, selected_pest):
-        st.markdown(f"### {selected_category} for {selected_pest}")
+        # Check if this is from pest identification context
+        pest_context = st.session_state.get('library_pest_context')
+        if pest_context and pest_context.lower() != selected_pest.lower():
+            st.markdown(f"### {selected_category} for {selected_pest}")
+            st.info(f"💡 **Note**: You identified **{pest_context}**, but we're showing treatments for **{selected_pest}** as the closest match in our library.")
+        else:
+            st.markdown(f"### {selected_category} for {selected_pest}")
         
         try:
             treatments = self.system.treatment_engine.get_treatments(selected_pest)
             
             if treatments and 'treatment_plan' in treatments:
+                # If we have context from identification, show a quick summary first
+                if pest_context:
+                    self._display_identification_context_summary(treatments, pest_context)
+                
                 self._display_treatment_by_category(selected_category, treatments)
                 self._display_additional_info(treatments)
                 st.success("✅ All treatments are organic-certified and OMRI-approved")
             
         except Exception as e:
             st.error(f"Error loading treatment information: {str(e)}")
+    
+    def _display_identification_context_summary(self, treatments, pest_context):
+        """Display a summary box when coming from pest identification."""
+        st.markdown("### 🎯 Quick Treatment Summary")
+        st.caption(f"Based on your identification of: {pest_context}")
+        
+        # Get immediate actions
+        immediate_actions = treatments.get('treatment_plan', {}).get('immediate_actions', [])
+        if immediate_actions:
+            st.markdown("**⚡ Immediate Actions Recommended:**")
+            for action in immediate_actions[:3]:  # Show top 3
+                method = action.get('method', 'N/A')
+                details = action.get('details', 'N/A')
+                st.markdown(f"• **{method}**: {details}")
+        
+        # Get IPM approach
+        ipm_approach = treatments.get('imp_approach', {}).get('approach')
+        if ipm_approach:
+            st.info(f"**🔄 IPM Strategy**: {ipm_approach}")
+        
+        st.markdown("---")  # Separator
     
     def _display_treatment_by_category(self, selected_category, treatments):
         category_mapping = {
