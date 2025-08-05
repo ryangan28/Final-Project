@@ -343,6 +343,10 @@ class PestIdentificationPage:
     
     def display(self):
         st.markdown('<h2 class="section-header">🔍 Pest Identification</h2>', unsafe_allow_html=True)
+        
+        # Model selection section
+        self._display_model_selection()
+        
         col1, col2 = st.columns([1, 1])
         
         with col1:
@@ -351,6 +355,70 @@ class PestIdentificationPage:
         
         with col2:
             self._display_results()
+    
+    def _display_model_selection(self):
+        """Display model selection dropdown."""
+        st.markdown("### 🤖 Model Selection")
+        
+        # Get available models
+        available_models = self.system.get_available_models()
+        
+        if not available_models:
+            st.warning("No models available. Please check your model files.")
+            return
+        
+        # Initialize selected model if not set
+        if 'selected_model' not in st.session_state:
+            st.session_state.selected_model = available_models[0]['id']
+            # Set the initial model in the system
+            self.system.switch_model(st.session_state.selected_model)
+        
+        # Create model options
+        model_options = []
+        model_ids = []
+        for model in available_models:
+            display_name = f"{model['name']} ({model['type']})"
+            model_options.append(display_name)
+            model_ids.append(model['id'])
+        
+        # Find current index
+        current_index = 0
+        if st.session_state.selected_model in model_ids:
+            current_index = model_ids.index(st.session_state.selected_model)
+        
+        # Model selection dropdown
+        selected_option = st.selectbox(
+            "Choose the model for pest detection:",
+            options=model_options,
+            index=current_index,
+            help="Different models may have different accuracy and speed characteristics"
+        )
+        
+        # Check if selection changed
+        selected_index = model_options.index(selected_option)
+        new_model_id = model_ids[selected_index]
+        
+        if new_model_id != st.session_state.selected_model:
+            with st.spinner(f"Switching to {selected_option}..."):
+                st.session_state.selected_model = new_model_id
+                
+                if self.system.switch_model(new_model_id):
+                    st.success(f"✅ Switched to {selected_option}")
+                    # Force rerun to update UI immediately
+                    st.rerun()
+                else:
+                    st.error("❌ Failed to switch model")
+                    # Revert session state on failure
+                    st.session_state.selected_model = model_ids[current_index]
+        
+        # Display current model info
+        current_model = next((m for m in available_models if m['id'] == st.session_state.selected_model), None)
+        if current_model:
+            st.info(f"🎯 Active model: **{current_model['name']}** ({current_model['type']})")
+            if current_model.get('description'):
+                st.caption(current_model['description'])
+        
+        st.markdown("---")
     
     def _display_photo_tips(self):
         st.markdown("### 📸 Photography Tips")
@@ -424,11 +492,13 @@ class PestIdentificationPage:
     
     def _display_successful_results(self, results):
         # Display identification results in a single container
+        detection_method = results.get('detection_method', 'unknown')
         st.markdown(f"""
         <div class="success-box">
             <p><strong>🐛 Pest Identified:</strong> {results['pest_type']}</p>
             <p><strong>🎯 Confidence:</strong> {results['confidence']:.1%}</p>
             <p><strong>⚠️ Severity:</strong> {results['severity'].title()}</p>
+            <p><strong>🤖 Model Used:</strong> {detection_method}</p>
         </div>
         """, unsafe_allow_html=True)
         
@@ -486,10 +556,12 @@ class PestIdentificationPage:
     
     def _display_failed_results(self, results):
         error_message = f"Message: {results['message']}" if 'message' in results else ""
+        detection_method = results.get('detection_method', 'unknown')
         st.markdown(f"""
         <div class="error-box">
             <p><strong>❌ Identification Failed</strong></p>
             {f"<p>{error_message}</p>" if error_message else ""}
+            <p><strong>🤖 Model Used:</strong> {detection_method}</p>
         </div>
         """, unsafe_allow_html=True)
 

@@ -1,9 +1,9 @@
 """
-YOLOv8-nano Training Pipeline for Pest Classification
-===================================================
+YOLOv8 Training Pipeline for Pest Classification
+==============================================
 
 This module implements a complete training pipeline using YOLOv8-nano
-for agricultural pest classification using the datasets.
+for agricultural pest classification in the Organic Farm Pest Management AI System.
 """
 
 import os
