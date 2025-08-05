@@ -82,12 +82,9 @@ class NavigationHandler:
     @staticmethod
     def get_pages():
         return [
-            "Home",
             "Pest Identification", 
             CHAT_ASSISTANT_PAGE,
-            TREATMENT_LIBRARY_PAGE,
-            "System Status",
-            "About"
+            TREATMENT_LIBRARY_PAGE
         ]
     
     @staticmethod
@@ -103,7 +100,7 @@ class NavigationHandler:
             return TREATMENT_LIBRARY_PAGE
         
         # Return the page from the radio selector
-        return st.session_state.get('page_radio', 'Home')
+        return st.session_state.get('page_radio', 'Pest Identification')
 
 
 class ImageHandler:
@@ -241,100 +238,6 @@ class SessionStateManager:
             st.session_state.chat_history.append(("Assistant", error_msg))
 
 
-class HomePage:
-    """Handles the home page display."""
-    
-    @staticmethod
-    def display():
-        col1, col2 = st.columns([2, 1])
-        
-        with col1:
-            HomePage._display_welcome_content()
-            HomePage._display_recent_activity()
-        
-        with col2:
-            HomePage._display_capabilities()
-            HomePage._display_supported_pests()
-    
-    @staticmethod
-    def _display_welcome_content():
-        st.markdown("""
-        ## Welcome to Your AI-Powered Pest Management Assistant! 🌾
-        
-        This system helps organic farmers identify pests and receive tailored treatment recommendations
-        that maintain organic certification standards.
-        
-        ### 🚀 Quick Start Guide:
-        
-        1. **📸 Take a Photo**: Capture a clear image of the pest or damage
-        2. **🔍 Upload & Identify**: Use the Pest Identification page to analyze your image
-        3. **💬 Get Guidance**: Chat with our AI assistant for detailed advice
-        4. **🌱 Apply Treatment**: Follow organic-certified treatment recommendations
-        
-        ### ✨ Key Features:
-        
-        - **Offline-First Design**: Works without internet connectivity
-        - **Organic Certified**: All treatments are OMRI-approved
-        - **Real-Time Analysis**: Instant pest identification and recommendations
-        - **IPM Approach**: Integrated Pest Management principles
-        - **Expert Knowledge**: Based on agricultural research and best practices
-        """)
-    
-    @staticmethod
-    def _display_recent_activity():
-        recent_identifications = st.session_state.get('recent_identifications', [])
-        if not recent_identifications:
-            return
-            
-        st.markdown("### 📝 Recent Activity")
-        for identification in recent_identifications[-3:]:
-            HomePage._display_single_identification(identification)
-    
-    @staticmethod
-    def _display_single_identification(identification):
-        try:
-            if not isinstance(identification, dict):
-                st.warning("⚠️ Invalid identification format")
-                return
-                
-            if identification.get('success') and 'pest_type' in identification:
-                pest_type = identification['pest_type']
-                confidence = identification.get('confidence', 0.0)
-                st.info(f"🐛 Identified: {pest_type} (Confidence: {confidence:.1%})")
-            else:
-                st.warning("⚠️ Incomplete identification result")
-                
-        except Exception as e:
-            st.error(f"❌ Error displaying result: {str(e)}")
-    
-    @staticmethod
-    def _display_capabilities():
-        st.markdown("### 🎯 System Capabilities")
-        
-        capabilities = [
-            "🔍 Computer Vision Pest Detection",
-            "🤖 Conversational AI Assistant", 
-            "📱 Mobile-Friendly Interface",
-            "🌐 Offline Operation",
-            "📊 Treatment Effectiveness Tracking",
-            "🏆 Organic Certification Compliance"
-        ]
-        
-        for capability in capabilities:
-            st.markdown(f"✅ {capability}")
-    
-    @staticmethod
-    def _display_supported_pests():
-        st.markdown("### 🌱 Supported Pests")
-        pest_types = [
-            "Aphids", "Caterpillars", "Spider Mites", "Whitefly",
-            "Thrips", "Colorado Potato Beetle", "Cucumber Beetle", "Flea Beetle"
-        ]
-        
-        for pest in pest_types:
-            st.markdown(f"• {pest}")
-
-
 class PestIdentificationPage:
     """Handles the pest identification page."""
     
@@ -343,33 +246,86 @@ class PestIdentificationPage:
     
     def display(self):
         st.markdown('<h2 class="section-header">🔍 Pest Identification</h2>', unsafe_allow_html=True)
+        
+        # Model selection section
+        self._display_model_selection()
+        
         col1, col2 = st.columns([1, 1])
         
         with col1:
-            self._display_photo_tips()
             self._display_upload_section()
         
         with col2:
             self._display_results()
+        
+        # Photography Tips section below both columns
+        self._display_photography_tips()
     
-    def _display_photo_tips(self):
-        st.markdown("### 📸 Photography Tips")
-        st.markdown("For best identification results, follow these photography guidelines:")
+    def _display_model_selection(self):
+        """Display model selection dropdown."""
+        st.markdown("### 🤖 Model Selection")
         
-        demo_images = ImageHandler.get_demo_images()
-        ImageHandler.display_demo_images(demo_images)
+        # Get available models
+        available_models = self.system.get_available_models()
         
-        st.markdown("""
-        **Tips for Clear Photos:**
-        - 📱 Hold device steady
-        - 🔍 Get close to the pest
-        - ☀️ Use good lighting
-        - 🎯 Focus on the pest clearly
-        - 📐 Include size reference if possible
-        """)
+        if not available_models:
+            st.warning("No models available. Please check your model files.")
+            return
+        
+        # Initialize selected model if not set
+        if 'selected_model' not in st.session_state:
+            st.session_state.selected_model = available_models[0]['id']
+            # Set the initial model in the system
+            self.system.switch_model(st.session_state.selected_model)
+        
+        # Create model options
+        model_options = []
+        model_ids = []
+        for model in available_models:
+            display_name = f"{model['name']} ({model['type']})"
+            model_options.append(display_name)
+            model_ids.append(model['id'])
+        
+        # Find current index
+        current_index = 0
+        if st.session_state.selected_model in model_ids:
+            current_index = model_ids.index(st.session_state.selected_model)
+        
+        # Model selection dropdown
+        selected_option = st.selectbox(
+            "Choose the model for pest detection:",
+            options=model_options,
+            index=current_index,
+            help="Different models may have different accuracy and speed characteristics"
+        )
+        
+        # Check if selection changed
+        selected_index = model_options.index(selected_option)
+        new_model_id = model_ids[selected_index]
+        
+        if new_model_id != st.session_state.selected_model:
+            with st.spinner(f"Switching to {selected_option}..."):
+                st.session_state.selected_model = new_model_id
+                
+                if self.system.switch_model(new_model_id):
+                    st.success(f"✅ Switched to {selected_option}")
+                    # Force rerun to update UI immediately
+                    st.rerun()
+                else:
+                    st.error("❌ Failed to switch model")
+                    # Revert session state on failure
+                    st.session_state.selected_model = model_ids[current_index]
+        
+        # Display current model info
+        current_model = next((m for m in available_models if m['id'] == st.session_state.selected_model), None)
+        if current_model:
+            st.info(f"🎯 Active model: **{current_model['name']}** ({current_model['type']})")
+            if current_model.get('description'):
+                st.caption(current_model['description'])
+        
+        st.markdown("---")
     
     def _display_upload_section(self):
-        st.markdown("---")
         st.markdown("### 📸 Upload Your Own Image")
         
         uploaded_file = st.file_uploader(
@@ -384,8 +340,6 @@ class PestIdentificationPage:
             
             if st.button("🔬 Analyze Image", type="primary"):
                 self._process_image_analysis(uploaded_file)
-        
-        self._display_photography_tips()
     
     def _process_image_analysis(self, uploaded_file):
         with st.spinner("Analyzing image for pest identification..."):
@@ -400,9 +354,18 @@ class PestIdentificationPage:
     
     def _display_photography_tips(self):
         st.markdown("### 📷 Photography Tips")
+        st.markdown("For best identification results, follow these photography guidelines:")
+        
+        demo_images = ImageHandler.get_demo_images()
+        ImageHandler.display_demo_images(demo_images)
+        
         st.info("""
-        **For Best Results:**
-        - Use good lighting (natural light preferred)
+        **Tips for Clear Photos:**
+        - 📱 Hold device steady
+        - 🔍 Get close to the pest
+        - ☀️ Use good lighting (natural light preferred)
+        - 🎯 Focus on the pest clearly
+        - 📐 Include size reference if possible
         - Take close-up shots of the pest
         - Include any visible damage
         - Keep the image in focus
@@ -424,11 +387,13 @@ class PestIdentificationPage:
     
     def _display_successful_results(self, results):
         # Display identification results in a single container
+        detection_method = results.get('detection_method', 'unknown')
         st.markdown(f"""
         <div class="success-box">
             <p><strong>🐛 Pest Identified:</strong> {results['pest_type']}</p>
             <p><strong>🎯 Confidence:</strong> {results['confidence']:.1%}</p>
             <p><strong>⚠️ Severity:</strong> {results['severity'].title()}</p>
+            <p><strong>🤖 Model Used:</strong> {detection_method}</p>
         </div>
         """, unsafe_allow_html=True)
         
@@ -481,15 +446,18 @@ class PestIdentificationPage:
         with col_b:
             if st.button("📚 View Treatment Library"):
                 st.session_state.navigate_to_library = True
+                st.session_state.library_pest_context = results.get('pest_type')
                 st.success("🔄 Switching to Treatment Library...")
                 st.rerun()
     
     def _display_failed_results(self, results):
         error_message = f"Message: {results['message']}" if 'message' in results else ""
+        detection_method = results.get('detection_method', 'unknown')
         st.markdown(f"""
         <div class="error-box">
             <p><strong>❌ Identification Failed</strong></p>
             {f"<p>{error_message}</p>" if error_message else ""}
+            <p><strong>🤖 Model Used:</strong> {detection_method}</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -573,15 +541,25 @@ class TreatmentLibraryPage:
     
     def display(self):
         st.markdown('<h2 class="section-header">📚 Organic Treatment Library</h2>', unsafe_allow_html=True)
+        
+        # Check if we have pest context from identification
+        pest_context = st.session_state.get('library_pest_context')
+        if pest_context:
+            st.info(f"🎯 Showing treatments for recently identified pest: **{pest_context}**")
+            # Clear the context after showing it once
+            if st.button("🔄 Browse All Pests"):
+                st.session_state.library_pest_context = None
+                st.rerun()
+        
         col1, col2 = st.columns([1, 2])
         
         with col1:
-            selected_category, selected_pest = self._display_selection_panel()
+            selected_category, selected_pest = self._display_selection_panel(pest_context)
         
         with col2:
             self._display_treatment_details(selected_category, selected_pest)
     
-    def _display_selection_panel(self):
+    def _display_selection_panel(self, pest_context=None):
         st.markdown("### 🎯 Treatment Categories")
         
         categories = {
@@ -599,23 +577,89 @@ class TreatmentLibraryPage:
             "Thrips", "Colorado Potato Beetle", "Cucumber Beetle", "Flea Beetle"
         ]
         
-        selected_pest = st.selectbox("Pest Type:", pest_types)
+        # If we have pest context, try to find and pre-select it
+        default_index = 0
+        if pest_context:
+            # Create a mapping from detected pest names to library entries
+            pest_mapping = {
+                'ants': 'Aphids',  # Closest match in available types
+                'bees': 'Aphids',  # Beneficial insects, but show organic-friendly options
+                'beetle': 'Colorado Potato Beetle',
+                'caterpillars': 'Caterpillars',
+                'catterpillar': 'Caterpillars',
+                'earthworms': 'Aphids',  # Beneficial, show general organic options
+                'earwig': 'Flea Beetle',  # Similar pest category
+                'grasshopper': 'Caterpillars',  # Similar damage patterns
+                'moth': 'Caterpillars',  # Moth larvae are caterpillars
+                'slug': 'Aphids',  # Show general organic pest control
+                'snail': 'Aphids',  # Show general organic pest control
+                'wasp': 'Aphids',  # Often beneficial, show organic-friendly options
+                'weevil': 'Cucumber Beetle'  # Similar beetle family
+            }
+            
+            # Try direct mapping first
+            pest_lower = pest_context.lower()
+            if pest_lower in pest_mapping:
+                target_pest = pest_mapping[pest_lower]
+                try:
+                    default_index = pest_types.index(target_pest)
+                except ValueError:
+                    pass
+            else:
+                # Try to find the pest in our list (case-insensitive matching)
+                for i, pest in enumerate(pest_types):
+                    if pest.lower() in pest_lower or pest_lower in pest.lower():
+                        default_index = i
+                        break
+        
+        selected_pest = st.selectbox("Pest Type:", pest_types, index=default_index)
         
         return selected_category, selected_pest
     
     def _display_treatment_details(self, selected_category, selected_pest):
-        st.markdown(f"### {selected_category} for {selected_pest}")
+        # Check if this is from pest identification context
+        pest_context = st.session_state.get('library_pest_context')
+        if pest_context and pest_context.lower() != selected_pest.lower():
+            st.markdown(f"### {selected_category} for {selected_pest}")
+            st.info(f"💡 **Note**: You identified **{pest_context}**, but we're showing treatments for **{selected_pest}** as the closest match in our library.")
+        else:
+            st.markdown(f"### {selected_category} for {selected_pest}")
         
         try:
             treatments = self.system.treatment_engine.get_treatments(selected_pest)
             
             if treatments and 'treatment_plan' in treatments:
+                # If we have context from identification, show a quick summary first
+                if pest_context:
+                    self._display_identification_context_summary(treatments, pest_context)
+                
                 self._display_treatment_by_category(selected_category, treatments)
                 self._display_additional_info(treatments)
                 st.success("✅ All treatments are organic-certified and OMRI-approved")
             
         except Exception as e:
             st.error(f"Error loading treatment information: {str(e)}")
+    
+    def _display_identification_context_summary(self, treatments, pest_context):
+        """Display a summary box when coming from pest identification."""
+        st.markdown("### 🎯 Quick Treatment Summary")
+        st.caption(f"Based on your identification of: {pest_context}")
+        
+        # Get immediate actions
+        immediate_actions = treatments.get('treatment_plan', {}).get('immediate_actions', [])
+        if immediate_actions:
+            st.markdown("**⚡ Immediate Actions Recommended:**")
+            for action in immediate_actions[:3]:  # Show top 3
+                method = action.get('method', 'N/A')
+                details = action.get('details', 'N/A')
+                st.markdown(f"• **{method}**: {details}")
+        
+        # Get IPM approach
+        ipm_approach = treatments.get('imp_approach', {}).get('approach')
+        if ipm_approach:
+            st.info(f"**🔄 IPM Strategy**: {ipm_approach}")
+        
+        st.markdown("---")  # Separator
     
     def _display_treatment_by_category(self, selected_category, treatments):
         category_mapping = {
@@ -661,239 +705,6 @@ class TreatmentLibraryPage:
             st.info(approach)
 
 
-class SystemStatusPage:
-    """Handles the system status page."""
-    
-    def __init__(self, system):
-        self.system = system
-    
-    def display(self):
-        st.markdown('<h2 class="section-header">⚙️ System Status</h2>', unsafe_allow_html=True)
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            self._display_system_health()
-            self._display_performance_metrics()
-        
-        with col2:
-            self._display_troubleshooting()
-            self._display_edge_optimization()
-    
-    def _display_system_health(self):
-        st.markdown("### 🖥️ System Health")
-        
-        st.metric("Pest Detection Model", "✅ Loaded", "Ready")
-        st.metric("Treatment Engine", "✅ Loaded", "50+ treatments")
-        st.metric("Chat Assistant", "✅ Active", "Responding")
-        
-        self._display_optimization_status()
-    
-    def _display_optimization_status(self):
-        optimization_level, features = self._get_optimization_info()
-        
-        status_config = {
-            "enhanced": ("🚀 Enhanced", "Complete ML stack", st.success, "📈 **Enhanced Mode**: Full ML optimization capabilities available."),
-            "standard": ("✅ Standard", f"{len(features)} features", st.info, f"📊 **Standard Mode**: Core ML features available - {', '.join(features)}"),
-            "lightweight": ("✅ Lightweight", "Simulation-based", st.info, "🌱 **Lightweight Mode**: Intelligent simulation system optimized for organic farming. Provides reliable pest detection without requiring heavy ML dependencies - perfect for edge deployment.")
-        }
-        
-        status, delta, display_func, message = status_config[optimization_level]
-        st.metric(EDGE_OPTIMIZATION_LABEL, status, delta)
-        display_func(message)
-    
-    def _get_optimization_info(self):
-        optimization_level = "lightweight"
-        features = []
-        
-        try:
-            import torch
-            features.append("PyTorch ML")
-            optimization_level = "standard"
-        except ImportError:
-            pass
-            
-        try:
-            import onnx
-            features.append("ONNX optimization")
-            if optimization_level == "standard":
-                optimization_level = "enhanced"
-        except ImportError:
-            pass
-            
-        try:
-            import psutil
-            features.append("Performance monitoring")
-        except ImportError:
-            pass
-        
-        return optimization_level, features
-    
-    def _display_performance_metrics(self):
-        st.markdown("### 📊 Performance")
-        st.metric("Model Size", "< 50 MB", "Edge optimized")
-        st.metric("Inference Time", "< 200ms", "Real-time")
-        st.metric("Accuracy", "87%+", "High confidence")
-    
-    def _display_troubleshooting(self):
-        st.markdown("### 🔧 Troubleshooting")
-        
-        test_functions = [
-            ("🔄 Test Pest Detection", self._test_pest_detection),
-            ("🧪 Test Treatment Engine", self._test_treatment_engine),
-            ("💬 Test Chat Assistant", self._test_chat_assistant)
-        ]
-        
-        for button_text, test_func in test_functions:
-            if st.button(button_text):
-                test_func()
-    
-    def _test_pest_detection(self):
-        with st.spinner("Testing pest detection model..."):
-            try:
-                test_results = {
-                    'model_loaded': True,
-                    'inference_speed': '150ms',
-                    'status': 'healthy'
-                }
-                st.success("✅ Pest detection model is working correctly")
-                st.json(test_results)
-            except Exception as e:
-                st.error(f"❌ Pest detection test failed: {str(e)}")
-    
-    def _test_treatment_engine(self):
-        with st.spinner("Testing treatment recommendations..."):
-            try:
-                test_treatment = self.system.treatment_engine.get_treatments("Aphids", "medium")
-                st.success("✅ Treatment engine is working correctly")
-                immediate_count = len(test_treatment.get('treatment_plan', {}).get('immediate_actions', []))
-                st.write(f"Found {immediate_count} immediate treatments")
-            except Exception as e:
-                st.error(f"❌ Treatment engine test failed: {str(e)}")
-    
-    def _test_chat_assistant(self):
-        with st.spinner("Testing chat assistant..."):
-            try:
-                test_response = self.system.chat_with_system("Hello, are you working?")
-                st.success("✅ Chat assistant is responding")
-                st.write(f"Response length: {len(test_response)} characters")
-            except Exception as e:
-                st.error(f"❌ Chat assistant test failed: {str(e)}")
-    
-    def _display_edge_optimization(self):
-        st.markdown(f"### 🔄 {EDGE_OPTIMIZATION_LABEL}")
-        if st.button(f"⚡ Run {EDGE_OPTIMIZATION_LABEL}"):
-            with st.spinner("Optimizing models for edge deployment..."):
-                try:
-                    optimization_results = self.system.optimize_for_edge()
-                    st.success("✅ Edge optimization complete")
-                    st.json(optimization_results)
-                except Exception as e:
-                    st.error(f"❌ Edge optimization failed: {str(e)}")
-
-
-class AboutPage:
-    """Handles the about page."""
-    
-    @staticmethod
-    def display():
-        st.markdown('<h2 class="section-header">ℹ️ About This System</h2>', unsafe_allow_html=True)
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            AboutPage._display_system_info()
-        
-        with col2:
-            AboutPage._display_team_info()
-    
-    @staticmethod
-    def _display_system_info():
-        st.markdown("""
-        ### 🌱 Organic Farm Pest Management AI
-        
-        This system was developed to help organic farmers identify pests and receive
-        treatment recommendations that maintain organic certification standards.
-        
-        **Key Features:**
-        - ✅ Offline-first operation with edge computing
-        - ✅ Computer vision pest identification using YOLOv8
-        - ✅ Conversational AI assistant with contextual responses
-        - ✅ OMRI-approved organic treatments only
-        - ✅ Integrated Pest Management (IPM) approach
-        - ✅ Mobile-responsive web interface
-        - ✅ Comprehensive treatment library with 50+ organic solutions
-        - ✅ Real-time performance monitoring and optimization
-        
-        **Technology Stack:**
-        - 🧠 **AI/ML**: YOLOv8 for pest detection, Custom classification models
-        - 👁️ **Computer Vision**: PIL, OpenCV-compatible image processing
-        - 💬 **Natural Language**: Context-aware chat system with treatment recommendations
-        - 📱 **Frontend**: Streamlit with responsive design and custom CSS
-        - ⚡ **Optimization**: ONNX runtime for edge deployment
-        - 🗄️ **Data**: JSON-based treatment database with compression
-        - 🔧 **Performance**: Real-time benchmarking and system monitoring
-        
-        **Supported Pest Types:**
-        - Ants, Bees, Beetles, Caterpillars
-        - Earthworms, Earwigs, Grasshoppers
-        - Moths, Slugs, Snails, Wasps, Weevils
-        
-        **Deployment Environments:**
-        - 💻 Desktop computers (Windows, macOS, Linux)
-        - 📱 Mobile devices via responsive web interface
-        - 🖥️ Edge computing devices with limited resources
-        - 🌐 Offline operation capability for remote farms
-        
-        **Performance Specifications:**
-        - Model size: < 50 MB for edge deployment
-        - Inference time: < 200ms for real-time analysis
-        - Accuracy: 87%+ confidence on supported pest types
-        - Memory usage: Optimized for 2GB+ RAM devices
-        """)
-    
-    @staticmethod
-    def _display_team_info():
-        st.markdown("""
-        ### 👥 Development Team
-        
-        This project was developed as part of the **Overseas Immersion Programme** by a collaborative team from **Singapore Institute of Technology (SIT)**:
-        
-        **🎓 Team Members - ICT (Information and Communications Technology):**
-        - **Ryan Koo Wei Feng** - Information Security (IS) - *Project Lead & System Architecture*
-        - **Farihin Fatten Binte Abdul Rahman** - Information Security (IS) - *Security & Data Protection*
-        - **Khoo Ye Chen** - Software Engineering (SE) - *Full-Stack Development & UI/UX*
-        - **Gan Kang Ting, Ryan** - Information Security (IS) - *Edge Computing & Optimization*
-        - **Donovan Leong Jia Le** - Applied Artificial Intelligence (AI) - *ML Models & Computer Vision*
-        
-        **📚 Academic Partnership:**
-        - � **Home Institution**: Singapore Institute of Technology (SIT)
-        - 🌏 **Host Institution**: FPT University Da Nang, Vietnam
-        - 📅 **Program Duration**: Trimester 3, Year 2
-        - 🎯 **Project Timeline**: August 2025
-        
-        **🚀 Project Scope & Impact:**
-        - 🌾 Real-world agricultural technology application
-        - 🤝 Interdisciplinary collaboration (SE + IS + AI)
-        - 🌱 Focus on sustainable organic farming practices
-        - 📊 Edge computing optimization for resource-constrained environments
-        - 🔒 Security-first design for agricultural data protection
-        
-        **🏆 Technical Achievements:**
-        - ✅ Lightweight AI model deployment (< 50MB)
-        - ✅ Real-time pest identification system
-        - ✅ Offline-capable edge computing implementation
-        - ✅ Comprehensive organic treatment database
-        - ✅ Mobile-responsive user interface
-        - ✅ Multi-language localization support
-        
-        **🙏 Acknowledgments:**
-        - Academic supervisors and mentors from SIT and FPT University
-        - Open-source community contributors
-        - Agricultural extension officers for domain expertise
-        - Local farmers for testing and feedback
-        - OMRI (Organic Materials Review Institute) for treatment standards
-        """)
-
-
 class SidebarManager:
     """Manages the sidebar content."""
     
@@ -923,12 +734,6 @@ class SidebarManager:
             pages, 
             key="page_radio"
         )
-        
-        st.sidebar.markdown("---")
-        SidebarManager._display_quick_stats()
-        
-        st.sidebar.markdown("---")
-        SidebarManager._display_emergency_info()
     
     @staticmethod
     def _display_quick_stats():
@@ -959,12 +764,9 @@ class StreamlitApp:
         
         # Initialize page handlers
         self.pages = {
-            'Home': HomePage(),
             'Pest Identification': PestIdentificationPage(system),
             CHAT_ASSISTANT_PAGE: ChatPage(system),
-            TREATMENT_LIBRARY_PAGE: TreatmentLibraryPage(system),
-            'System Status': SystemStatusPage(system),
-            'About': AboutPage()
+            TREATMENT_LIBRARY_PAGE: TreatmentLibraryPage(system)
         }
     
     def setup_page_config(self):

@@ -3,7 +3,7 @@ Comprehensive Model Evaluation and Testing Suite
 ==============================================
 
 Evaluate trained models with detailed metrics, uncertainty analysis,
-and production readiness assessment.
+and production readiness assessment for the Organic Farm Pest Management AI System.
 """
 
 import os
@@ -45,14 +45,14 @@ except ImportError as e:
 
 # Import our improved components
 sys.path.append(str(Path(__file__).parent.parent))
-from training.improved_train import ImprovedPestDataset, AgriculturalAugmentations
-from vision.improved_pest_detector import ImprovedPestDetector, EfficientNetPestClassifier
+from training.scripts.efficientnet_train import ImprovedPestDataset, AgriculturalAugmentations
+from vision.pest_detector import EfficientNetClassifier
 
 
 class ModelEvaluator:
     """Comprehensive model evaluation suite."""
     
-    def __init__(self, model_dir: str = "models/improved", data_dir: str = "datasets"):
+    def __init__(self, model_dir: str = "models/efficientnet/v1", data_dir: str = "datasets"):
         self.model_dir = Path(model_dir)
         self.data_dir = Path(data_dir)
         self.results_dir = self.model_dir / "evaluation_results"
@@ -77,7 +77,7 @@ class ModelEvaluator:
                     logger.warning(f"Invalid class mapping format in {class_mapping_path}")
         
         # Default mapping - try multiple model directories
-        for model_dir in [self.model_dir, Path("models/improved_quick"), Path("models/improved")]:
+        for model_dir in [self.model_dir, Path("models/archive/improved_quick"), Path("models/efficientnet/v1")]:
             class_mapping_path = model_dir / 'class_mapping.json'
             if class_mapping_path.exists():
                 try:
@@ -91,8 +91,8 @@ class ModelEvaluator:
         
         # Final fallback
         logger.warning("Using default class mapping")
-        from vision.improved_pest_detector import ImprovedPestDetector
-        detector = ImprovedPestDetector()
+        from vision.pest_detector import UnifiedPestDetector
+        detector = UnifiedPestDetector()
         return {
             'classes': list(detector.PEST_INFO.keys()),
             'class_to_idx': {cls: idx for idx, cls in enumerate(detector.PEST_INFO.keys())},
@@ -184,7 +184,7 @@ class ModelEvaluator:
         """Evaluate a single model."""
         # Load model
         checkpoint = torch.load(model_path, map_location=self.device)
-        model = EfficientNetPestClassifier(num_classes=self.class_mapping['num_classes'])
+        model = EfficientNetClassifier(num_classes=self.class_mapping['num_classes'])
         model.load_state_dict(checkpoint['model_state_dict'])
         model.to(self.device)
         model.eval()
@@ -242,7 +242,7 @@ class ModelEvaluator:
         
         for model_path in model_paths:
             checkpoint = torch.load(model_path, map_location=self.device)
-            model = EfficientNetPestClassifier(num_classes=self.class_mapping['num_classes'])
+            model = EfficientNetClassifier(num_classes=self.class_mapping['num_classes'])
             model.load_state_dict(checkpoint['model_state_dict'])
             model.to(self.device)
             model.eval()
@@ -362,7 +362,7 @@ class ModelEvaluator:
         }
         
         # Model size (if available)
-        total_params = sum(p.numel() for p in EfficientNetPestClassifier(
+        total_params = sum(p.numel() for p in EfficientNetClassifier(
             self.class_mapping['num_classes']
         ).parameters())
         
@@ -712,8 +712,8 @@ def main():
     
     # Check multiple possible model directories
     possible_dirs = [
-        Path("models/improved_quick"),
-        Path("models/improved"),
+        Path("models/archive/improved_quick"),
+        Path("models/efficientnet/v1"),
     ]
     
     model_dir = None
@@ -775,7 +775,7 @@ def main():
         for rec in results['recommendations'][:5]:  # Top 5 recommendations
             print(f"   {rec}")
     
-    print(f"\n📁 Detailed results saved in: models/improved/evaluation_results/")
+    print(f"\n📁 Detailed results saved in: models/efficientnet/v1/evaluation_results/")
     
     return results
 

@@ -1,9 +1,9 @@
 """
-Quick Improved Training Script
-============================
+EfficientNet Quick Training Script
+================================
 
-Fast training script for testing the improved pipeline with reduced parameters.
-Perfect for development and validation.
+Fast training script for testing the EfficientNet pipeline with reduced parameters.
+Perfect for development and validation of the Organic Farm Pest Management AI System.
 """
 
 import os
@@ -91,7 +91,7 @@ def quick_improved_train():
     
     # Import training components
     try:
-        from training.improved_train import ImprovedTrainer
+        from training.scripts.efficientnet_train import ImprovedTrainer
         print("✅ Improved training components loaded")
     except ImportError as e:
         print(f"❌ Failed to import improved training components: {e}")
@@ -108,7 +108,7 @@ def quick_improved_train():
     print("   • Uncertainty quantification: Enabled")
     
     # Initialize trainer with quick settings
-    trainer = ImprovedTrainer(data_dir=str(datasets_dir), output_dir="models/improved_quick")
+    trainer = ImprovedTrainer(data_dir=str(datasets_dir), output_dir="models/archive/improved_quick")
     
     # Override config for quick training
     trainer.config.update({
@@ -168,9 +168,9 @@ def quick_improved_train():
         
         # Next steps
         print(f"\n🎯 Next Steps:")
-        print(f"   1. Test the models: python training/evaluate_model.py")
-        print(f"   2. Use in main system: The improved detector will automatically load these models")
-        print(f"   3. For production: Run full training with more epochs and folds")
+        print("   1. Test the models: python training/scripts/evaluate_models.py")
+        print("   2. Use in main system: The EfficientNet detector will automatically load these models")
+        print("   3. For production: Run full training with more epochs and folds")
         
         print(f"\n📁 Models saved in: {trainer.output_dir}")
         

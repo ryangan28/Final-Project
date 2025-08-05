@@ -1,11 +1,11 @@
-# Organic Farm Pest Management AI System - Dependencies
-# Smart dependency management: Core + Optional features
+# Organic Farm Pest Management AI System - Streamlined Dependencies
+# Smart dependency management for 3-page interface: Pest Identification, Chat Assistant, Treatment Library
 
 # =============================================================================
 # CORE DEPENDENCIES (Required for basic functionality)
 # =============================================================================
-streamlit>=1.28.0                    # Web interface framework
-Pillow>=9.5.0                        # Image processing
+streamlit>=1.28.0                    # Streamlined 3-page web interface
+Pillow>=9.5.0                        # Image processing for pest identification
 numpy>=1.24.0                        # Numerical computing
 
 # =============================================================================
@@ -17,30 +17,30 @@ onnx>=1.14.0                         # Model optimization for edge deployment
 psutil>=5.9.0                        # System performance monitoring
 
 # =============================================================================
-# IMPROVED ML STACK (For enhanced pest detection with EfficientNet-B0)
+# ML STACK (For enhanced pest detection with multiple model support)
 # =============================================================================
 
-# Core ML Framework - Uncomment for improved training/inference
+# Core ML Framework for EfficientNet-B0 ensemble and YOLOv8 models
 torch>=2.0.0                       # PyTorch deep learning framework
 torchvision>=0.15.0                # Computer vision models and utilities
 ultralytics>=8.0.0                 # YOLO models for object detection and classification
-scikit-learn>=1.3.0                # Machine learning utilities
+scikit-learn>=1.3.0                # Machine learning utilities for fallback modes
 
-# LLM Integration
+# LLM Integration for Chat Assistant
 python-dotenv>=1.0.0               # Environment variable management
-requests>=2.31.0                   # HTTP client for LM Studio API
+requests>=2.31.0                   # HTTP client for LM Studio API integration
 
 # Data Science & Visualization
-matplotlib>=3.7.0                  # Plotting and visualization
+matplotlib>=3.7.0                  # Plotting and model visualization
 seaborn>=0.12.0                    # Statistical visualization
-pandas>=2.0.0                      # Data manipulation
+pandas>=2.0.0                      # Data manipulation and analysis
 
-# Computer Vision Libraries  
+# Computer Vision Libraries (Optional for advanced features)
 # opencv-python>=4.8.0               # OpenCV for advanced image processing
 # scikit-image>=0.21.0               # Additional image processing tools
 
-# Advanced Edge Optimization
-# onnxruntime>=1.15.0                # ONNX runtime for inference
+# Advanced Edge Optimization (Optional)
+# onnxruntime>=1.15.0                # ONNX runtime for optimized inference
 
 # =============================================================================
 # DEVELOPMENT & TESTING (Optional - For developers)

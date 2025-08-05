@@ -41,14 +41,14 @@ except ImportError:
 class PestManagementSystem:
     """Main system orchestrator for the pest management AI."""
     
-    def __init__(self):
+    def __init__(self, selected_model=None):
         """Initialize the system components."""
         logger.info("Initializing Organic Farm Pest Management AI System")
         
         # Import unified pest detector with all capabilities
         try:
             from vision.pest_detector import UnifiedPestDetector
-            self.pest_detector = UnifiedPestDetector()
+            self.pest_detector = UnifiedPestDetector(selected_model=selected_model)
             logger.info("Unified pest detector loaded with all available backends")
         except ImportError as e:
             logger.warning(f"Vision module not available: {e}")
@@ -76,6 +76,18 @@ class PestManagementSystem:
             self.model_optimizer = None
         
         logger.info("System initialization complete")
+    
+    def get_available_models(self):
+        """Get available models for selection."""
+        if not self.pest_detector:
+            return []
+        return self.pest_detector.get_available_models()
+    
+    def switch_model(self, selected_model):
+        """Switch to a different model."""
+        if not self.pest_detector:
+            return False
+        return self.pest_detector.switch_model(selected_model)
     
     def identify_pest(self, image_path):
         """
@@ -187,11 +199,22 @@ def main():
     print("🌱 Organic Farm Pest Management AI System")
     print("=" * 50)
     
-    # Initialize the system
-    system = PestManagementSystem()
-    
-    # Try to create and run the web interface
+    # Check if running in Streamlit context
     try:
+        import streamlit as st
+        # Running in Streamlit - use session state for persistence
+        
+        # 1) Cache the system so it survives reruns
+        if "pest_system" not in st.session_state:
+            st.session_state.pest_system = PestManagementSystem()
+        
+        system = st.session_state.pest_system
+        
+        # 2) If user has already picked a model, make sure the detector still uses it
+        if "selected_model" in st.session_state:
+            system.switch_model(st.session_state.selected_model)
+        
+        # Create and run the web interface with persistent system
         from mobile.app_interface import create_app
         app = create_app(system)
         
@@ -201,10 +224,25 @@ def main():
         
         app.run()
         
-    except ImportError as e:
-        logger.error(f"Web interface not available: {e}")
-        print("\n❌ Web interface not available")
-        print("💡 Running in console mode...")
+    except ImportError:
+        # Not in Streamlit context - create system normally for console mode
+        system = PestManagementSystem()
+        
+        # Try to create and run the web interface
+        try:
+            from mobile.app_interface import create_app
+            app = create_app(system)
+            
+            print("\n🚀 Starting web interface...")
+            print("📱 Access the system at: http://localhost:8501")
+            print("💡 Upload pest images for identification and treatment recommendations")
+            
+            app.run()
+            
+        except ImportError as e:
+            logger.error(f"Web interface not available: {e}")
+            print("\n❌ Web interface not available")
+            print("💡 Running in console mode...")
         
         # Console mode interaction
         print("\n🌱 Console Mode - Organic Farm Pest Management AI")

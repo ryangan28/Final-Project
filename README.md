@@ -1,6 +1,6 @@
 # 🌱 Organic Farm Pest Management AI System
 
-An intelligent, offline-first AI system for organic farmers that identifies agricultural pests through computer vision and provides OMRI-certified treatment recommendations.
+A streamlined, intelligent AI system for organic farmers that identifies agricultural pests through computer vision and provides OMRI-certified treatment recommendations with an intuitive 3-page interface.
 
 ![Python](https://img.shields.io/badge/python-v3.8+-blue.svg)
 ![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=flat&logo=PyTorch&logoColor=white)
@@ -34,41 +34,46 @@ The application will automatically check dependencies and launch at `http://loca
 - **Multi-Backend System**: Graceful degradation from ML to simulation modes
 - **12 Pest Classes**: Comprehensive coverage of common agricultural pests
 - **Real-time Processing**: Optimized inference with CPU/GPU support
+- **Model Selection**: Choose between different detection models for speed vs accuracy
 
 ### 💬 Conversational AI Assistant
 - **LM Studio Integration**: Local LLM for privacy-preserving conversations
-- **Context-Aware Responses**: Integrates pest detection results
+- **Context-Aware Responses**: Integrates pest detection results automatically
 - **Agricultural Expertise**: Specialized prompts for farming scenarios
 - **Offline Capability**: Works without internet connection
+- **Quick Actions**: Pre-defined prompts for common farming questions
 
-### 🌿 Organic Treatment Database
+### 🌿 Organic Treatment Library
 - **OMRI-Certified Solutions**: 100% organic-compliant treatments
 - **IPM Principles**: Integrated Pest Management approach
 - **Severity-Based Plans**: Scaled responses (low/medium/high)
 - **Comprehensive Coverage**: Mechanical, biological, and cultural controls
+- **Smart Navigation**: Context-aware library showing relevant treatments
+- **Pest-Specific Mapping**: Automatic pest-to-treatment matching
 
-### 📱 User Interface
-- **Web Application**: Modern Streamlit interface
-- **Mobile-Friendly**: Responsive design for field use
-- **Image Upload**: Drag-and-drop or camera capture
-- **Real-time Results**: Instant pest identification
+### 📱 Streamlined User Interface
+- **3-Page Design**: Focused workflow with Pest Identification, Chat Assistant, and Treatment Library
+- **Mobile-Friendly**: Responsive design optimized for field use
+- **Context-Aware Navigation**: Seamlessly transition between identification and treatments
+- **Real-time Results**: Instant pest identification with confidence scores
+- **Smart Treatment Selection**: Pre-selects relevant treatments based on pest identification
 
 ## 🐛 Supported Pest Types
 
-| Pest | Scientific Name | Type |
-|------|----------------|------|
-| Ants | Formicidae | Mixed Impact |
-| Bees | Apis mellifera | **Beneficial** ✅ |
-| Beetles | Coleoptera | Crop Pest |
-| Caterpillars | Lepidoptera larvae | Crop Pest |
-| Earthworms | Oligochaeta | **Beneficial** ✅ |
-| Earwigs | Dermaptera | Mixed Impact |
-| Grasshoppers | Orthoptera | Crop Pest |
-| Moths | Lepidoptera | Crop Pest |
-| Slugs | Gastropoda | Crop Pest |
-| Snails | Gastropoda | Crop Pest |
-| Wasps | Hymenoptera | Mixed Impact |
-| Weevils | Curculionidae | Crop Pest |
+| Pest | Scientific Name | Type | Treatment Mapping |
+|------|----------------|------|-------------------|
+| Ants | Formicidae | Mixed Impact | → Aphids (General Organic) |
+| Bees | Apis mellifera | **Beneficial** ✅ | → Aphids (Bee-Friendly) |
+| Beetles | Coleoptera | Crop Pest | → Colorado Potato Beetle |
+| Caterpillars | Lepidoptera larvae | Crop Pest | → Caterpillars |
+| Earthworms | Oligochaeta | **Beneficial** ✅ | → Aphids (Beneficial Preservation) |
+| Earwigs | Dermaptera | Mixed Impact | → Flea Beetle |
+| Grasshoppers | Orthoptera | Crop Pest | → Caterpillars |
+| Moths | Lepidoptera | Crop Pest | → Caterpillars |
+| Slugs | Gastropoda | Crop Pest | → Aphids (General Organic) |
+| Snails | Gastropoda | Crop Pest | → Aphids (General Organic) |
+| Wasps | Hymenoptera | Mixed Impact | → Aphids (Beneficial-Friendly) |
+| Weevils | Curculionidae | Crop Pest | → Cucumber Beetle |
 
 ## 🏗️ Architecture
 
@@ -88,8 +93,11 @@ Final-Project/
 │   ├── chat_interface.py         # Chat UI and response generation
 │   └── llm_integration.py        # LM Studio API integration
 │
-├── 🌐 mobile/                    # Web Interface
-│   └── app_interface.py          # Streamlit web application
+├── 🌐 mobile/                    # Streamlined Web Interface
+│   └── app_interface.py          # 3-page Streamlit application
+│                                 # • Pest Identification
+│                                 # • Chat Assistant  
+│                                 # • Treatment Library
 │
 ├── ⚡ edge/                      # Edge Optimization
 │   └── model_optimizer.py        # Model compression for deployment
@@ -182,6 +190,12 @@ python-dotenv>=1.0.0       # Environment variables
 - **Enhanced Mode**: GPU acceleration with full ML stack
 - **Smart Launcher**: Automatic dependency checking and environment setup
 
+### Interface Innovations
+- **Context-Aware Navigation**: Treatment library pre-selects pests based on identification results
+- **Smart Pest Mapping**: Automatically maps detected pests to available treatment categories
+- **Seamless Workflow**: One-click transition from identification to specific treatments
+- **Simplified Design**: Focused 3-page interface reduces cognitive load for farmers
+
 ## 💻 Installation Options
 
 ### Basic Installation (Lightweight)
@@ -227,19 +241,24 @@ Each category contains representative images for training and testing the pest d
 
 ### 1. Pest Identification
 1. Launch the application: `python start.py`
-2. Navigate to "🔍 Pest Identification"
-3. Upload a clear photo of the pest or crop damage
-4. Click "Analyze" for instant results
+2. Navigate to "🔍 Pest Identification" (default page)
+3. Select your preferred detection model from the dropdown
+4. Upload a clear photo of the pest or crop damage
+5. Click "🔬 Analyze Image" for instant results
+6. View confidence scores, severity assessment, and detection method
 
 ### 2. Treatment Recommendations
-- Automatic recommendations based on pest type and severity
-- Browse the treatment library for detailed organic solutions
-- Filter by treatment type: mechanical, biological, or cultural
+- **Automatic Flow**: Click "📚 View Treatment Library" after pest identification
+- **Smart Pre-selection**: System automatically selects the closest matching pest
+- **Context Display**: See which pest was originally identified vs library match
+- **Quick Summary**: Immediate action recommendations before detailed treatments
+- **Browse Mode**: Switch to manual browsing with "🔄 Browse All Pests"
 
 ### 3. Chat Assistant
-- Ask questions in natural language
-- Get context-aware responses based on detections
-- Request specific guidance for your situation
+- **Context-Aware**: Click "💬 Chat About Treatment" for pest-specific guidance
+- **Natural Language**: Ask questions about organic farming and pest management
+- **Quick Actions**: Use pre-defined buttons for common farming scenarios
+- **Integrated Responses**: AI considers your recent pest identification results
 
 ## 🧪 Training Your Own Models
 
@@ -276,6 +295,32 @@ The system provides multiple detection backends with varying performance charact
 
 *Note: Performance metrics vary based on hardware and image complexity*
 
+## 🔄 User Workflow
+
+### Streamlined 3-Page Experience
+
+```mermaid
+graph TD
+    A[🔍 Pest Identification] --> B[Upload Image]
+    B --> C[Select Model]
+    C --> D[Analyze]
+    D --> E{Results}
+    E --> F[💬 Chat Assistant]
+    E --> G[📚 Treatment Library]
+    F --> H[Context-Aware Chat]
+    G --> I[Smart Pest Selection]
+    I --> J[Quick Treatment Summary]
+    J --> K[Detailed Treatments]
+    H --> L[Continue Conversation]
+    K --> M[Apply Treatments]
+```
+
+### Key Interface Features
+- **Single-Page Focus**: Each page serves a specific purpose without confusion
+- **Context Preservation**: Your pest identification follows you across pages
+- **Smart Defaults**: System pre-selects the most relevant options
+- **Clear Navigation**: Simple sidebar with just the 3 essential functions
+
 ## 🌐 API Usage
 
 ### LM Studio Integration
@@ -309,21 +354,48 @@ result = detector.detect_pest("path/to/image.jpg")
 }
 ```
 
+### Treatment Library Context API
+```python
+# Store pest context for treatment library
+st.session_state.library_pest_context = 'ants'
+
+# Treatment library automatically maps to closest match
+# 'ants' → 'Aphids' (general organic treatments)
+# 'beetle' → 'Colorado Potato Beetle'
+# 'caterpillars' → 'Caterpillars'
+```
+
 ## 👥 Development Team
 
 **Singapore Institute of Technology (SIT)**  
 Overseas Immersion Programme - Final Project
 
 **Team Members:**
-- Ryan Koo Wei Feng - Information Security (IS)
-- Farihin Fatten Binte Abdul Rahman - Information Security (IS)
-- Khoo Ye Chen - Software Engineering (SE)
-- Gan Kang Ting, Ryan - Information Security (IS)
-- Donovan Leong Jia Le - Applied Artificial Intelligence (AI)
+- **Ryan Koo Wei Feng** - Information Security (IS)
+- **Farihin Fatten Binte Abdul Rahman** - Information Security (IS)
+- **Khoo Ye Chen** - Software Engineering (SE)
+- **Gan Kang Ting, Ryan** - Information Security (IS)
+- **Donovan Leong Jia Le** - Applied Artificial Intelligence (AI)
 
 **Academic Collaboration:**
-- 🏫 Singapore Institute of Technology (SIT)
-- 🌏 FPT University Da Nang
+- 🏫 **Home Institution**: Singapore Institute of Technology (SIT)
+- 🌏 **Host Institution**: FPT University Da Nang, Vietnam
+- 📅 **Program Duration**: Trimester 3, Year 2
+- 🎯 **Project Timeline**: August 2025
+
+## 🚀 Project Innovations
+
+### Interface Design
+- **Reduced Complexity**: Streamlined from 6 pages to 3 focused workflows
+- **Context Preservation**: Pest identification results seamlessly flow to treatment recommendations
+- **Smart Mapping**: Automatic pest-to-treatment category matching reduces user confusion
+- **Mobile-First**: Optimized for field use with simplified navigation
+
+### Technical Achievements
+- **Multi-Model Selection**: Real-time switching between detection models
+- **Graceful Degradation**: System works even with minimal dependencies
+- **Context-Aware AI**: Chat assistant understands your specific pest situation
+- **Edge Optimization**: Lightweight deployment suitable for resource-constrained environments
 
 ## 🤝 Contributing
 
@@ -345,6 +417,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **PyTorch**: For the deep learning framework
 - **Agricultural Pests Dataset**: Kaggle dataset contributors
 - **Organic Farming Community**: For domain expertise and testing
+- **Academic Supervisors**: SIT and FPT University mentors
 
 ## 📞 Support
 
@@ -355,4 +428,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-*🌱 Supporting sustainable agriculture through AI-powered pest management*
+*🌱 Supporting sustainable agriculture through streamlined AI-powered pest management*

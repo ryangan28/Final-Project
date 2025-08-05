@@ -1,8 +1,9 @@
 """
-Quick Training Script for YOLOv8 Pest Classification
-===================================================
+YOLOv8 Quick Training Script for Pest Classification
+==================================================
 
-Run this script to train a YOLOv8-nano model on the pest dataset.
+Run this script to quickly train a YOLOv8-nano model on the pest dataset
+for the Organic Farm Pest Management AI System.
 """
 
 import os

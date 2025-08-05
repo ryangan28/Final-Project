@@ -1,9 +1,12 @@
 """
-Improved Pest Classification Training Pipeline
-===========================================
+EfficientNet Pest Classification Training Pipeline
+==============================================
 
 Modern training pipeline using EfficientNet-B0 with comprehensive validation,
 agricultural-specific augmentations, and uncertainty quantification.
+
+This script trains all three EfficientNet variants (v1, v2, v3) used in the
+Organic Farm Pest Management AI System.
 """
 
 import os
@@ -240,7 +243,7 @@ class EfficientNetPestClassifier(nn.Module):
 class ImprovedTrainer:
     """Modern training pipeline with comprehensive validation."""
     
-    def __init__(self, data_dir: str, output_dir: str = "models/improved"):
+    def __init__(self, data_dir: str, output_dir: str = "models/efficientnet/v1"):
         self.data_dir = Path(data_dir)
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)

@@ -71,20 +71,37 @@ logger.info(f"Overall ML available: {ML_AVAILABLE}")
 class EfficientNetClassifier(nn.Module):
     """EfficientNet-B0 based pest classifier with uncertainty quantification and temperature scaling."""
     
-    def __init__(self, num_classes=12, dropout_rate=0.3):
+    def __init__(self, num_classes=12, dropout_rate=0.3, use_batch_norm=False):
         super(EfficientNetClassifier, self).__init__()
         # Load pre-trained EfficientNet-B0
         self.backbone = models.efficientnet_b0(weights='DEFAULT')
         
         # Replace classifier with custom head to match saved model
         in_features = self.backbone.classifier[1].in_features  # Should be 1280
-        self.backbone.classifier = nn.Sequential(
-            nn.Dropout(dropout_rate),           # 0
-            nn.Linear(in_features, 512),        # 1
-            nn.ReLU(),                          # 2
-            nn.Dropout(dropout_rate),           # 3
-            nn.Linear(512, num_classes)         # 4
-        )
+        
+        if use_batch_norm:
+            # Architecture for improved_2 and improved_3 models
+            self.backbone.classifier = nn.Sequential(
+                nn.Dropout(dropout_rate),           # 0
+                nn.Linear(in_features, 512),        # 1
+                nn.BatchNorm1d(512),                # 2
+                nn.ReLU(),                          # 3
+                nn.Dropout(dropout_rate),           # 4
+                nn.Linear(512, 256),                # 5
+                nn.BatchNorm1d(256),                # 6
+                nn.ReLU(),                          # 7
+                nn.Dropout(dropout_rate),           # 8
+                nn.Linear(256, num_classes)         # 9
+            )
+        else:
+            # Original architecture for improved models
+            self.backbone.classifier = nn.Sequential(
+                nn.Dropout(dropout_rate),           # 0
+                nn.Linear(in_features, 512),        # 1
+                nn.ReLU(),                          # 2
+                nn.Dropout(dropout_rate),           # 3
+                nn.Linear(512, num_classes)         # 4
+            )
         
         # Temperature scaling for uncertainty calibration
         self.temperature = nn.Parameter(torch.ones(1) * 1.5)
@@ -217,7 +234,7 @@ class UnifiedPestDetector:
         }
     }
     
-    def __init__(self, model_path=None, confidence_threshold=0.4, uncertainty_threshold=0.8):
+    def __init__(self, model_path=None, confidence_threshold=0.4, uncertainty_threshold=0.8, selected_model=None):
         """
         Initialize the unified pest detection system.
         
@@ -225,10 +242,12 @@ class UnifiedPestDetector:
             model_path (str, optional): Path to model files directory
             confidence_threshold (float): Minimum confidence for positive detection
             uncertainty_threshold (float): Maximum uncertainty for confident prediction
+            selected_model (str, optional): Specific model to use ('efficientnet_v1', 'efficientnet_v2', 'efficientnet_v3', 'yolo')
         """
         self.model_path = Path(model_path) if model_path else Path("models")
         self.confidence_threshold = confidence_threshold
         self.uncertainty_threshold = uncertainty_threshold
+        self.selected_model = selected_model
         
         # Detection backends
         self.efficientnet_models = []
@@ -242,33 +261,48 @@ class UnifiedPestDetector:
         # Image preprocessing pipeline
         self._setup_transforms()
         
-        logger.info(f"UnifiedPestDetector initialized with {len(self._get_available_backends())} backend(s)")
+        logger.info(f"UnifiedPestDetector initialized with {len(self._get_available_backends())} backend(s), selected model: {selected_model}")
     
     def _initialize_backends(self):
-        """Initialize all available detection backends."""
+        """Initialize all available detection backends based on selected model."""
         
-        # 1. EfficientNet Ensemble (Primary)
-        if ML_CAPABILITIES['pytorch']:
-            self._load_efficientnet_ensemble()
-        
-        # 2. YOLO Model (Secondary)
-        if ML_CAPABILITIES['yolo']:
-            self._load_yolo_model()
-        
-        # 3. Basic CNN (Tertiary)
-        if ML_CAPABILITIES['pytorch']:
-            self._load_basic_model()
+        # If a specific model is selected, only load that one
+        if self.selected_model == 'yolo':
+            if ML_CAPABILITIES['yolo']:
+                self._load_yolo_model()
+        elif self.selected_model in ['efficientnet_v1', 'efficientnet_v2', 'efficientnet_v3']:
+            if ML_CAPABILITIES['pytorch']:
+                self._load_efficientnet_ensemble(self.selected_model)
+        # If no model is selected, load all available backends for dropdown selection
+        else:
+            # Load default EfficientNet model
+            if ML_CAPABILITIES['pytorch']:
+                self._load_efficientnet_ensemble('efficientnet_v1')
+            # Also load YOLO for availability in dropdown
+            if ML_CAPABILITIES['yolo']:
+                self._load_yolo_model()
     
-    def _load_efficientnet_ensemble(self):
+    def _load_efficientnet_ensemble(self, model_version=None):
         """Load EfficientNet-B0 ensemble models."""
         try:
+            # Determine which model version to load
+            if model_version == 'efficientnet_v2':
+                model_dir = "efficientnet/v2"
+                logger.info("Loading EfficientNet v2 models")
+            elif model_version == 'efficientnet_v3':
+                model_dir = "efficientnet/v3"
+                logger.info("Loading EfficientNet v3 models")
+            else:
+                model_dir = "efficientnet/v1"
+                logger.info("Loading EfficientNet v1 models")
+            
             # Load ensemble of 5 models for better accuracy
             ensemble_paths = [
-                self.model_path / "improved" / "best_model_fold_0.pth",
-                self.model_path / "improved" / "best_model_fold_1.pth",
-                self.model_path / "improved" / "best_model_fold_2.pth",
-                self.model_path / "improved" / "best_model_fold_3.pth",
-                self.model_path / "improved" / "best_model_fold_4.pth"
+                self.model_path / model_dir / "best_model_fold_0.pth",
+                self.model_path / model_dir / "best_model_fold_1.pth",
+                self.model_path / model_dir / "best_model_fold_2.pth",
+                self.model_path / model_dir / "best_model_fold_3.pth",
+                self.model_path / model_dir / "best_model_fold_4.pth"
             ]
             
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -279,8 +313,17 @@ class UnifiedPestDetector:
                     # Load the saved checkpoint
                     checkpoint = torch.load(model_path, map_location=device)
                     
-                    # Create model instance
-                    model = EfficientNetClassifier(num_classes=12)
+                    model_keys = list(checkpoint['model_state_dict'].keys())
+                    classifier_keys = [k for k in model_keys if 'classifier' in k]
+                    use_batch_norm = any('BatchNorm' in str(type(v)) for k, v in checkpoint['model_state_dict'].items() 
+                                        if 'classifier' in k) or any('running_mean' in k for k in classifier_keys)
+                    
+                    # Get dropout rate from config if available
+                    config = checkpoint.get('config', {})
+                    dropout_rate = config.get('dropout_rate', 0.3)
+                    
+                    # Create model instance with appropriate architecture
+                    model = EfficientNetClassifier(num_classes=12, dropout_rate=dropout_rate, use_batch_norm=use_batch_norm)
                     
                     # Load the model state dict
                     model.load_state_dict(checkpoint['model_state_dict'])
@@ -289,17 +332,19 @@ class UnifiedPestDetector:
                     model.enable_mc_dropout()  # Enable uncertainty estimation
                     
                     self.efficientnet_models.append(model)
-                    logger.info(f"Loaded EfficientNet model {i+1}/5 (fold {i}) - Val Acc: {checkpoint.get('val_acc', 'N/A'):.3f}")
+                    val_acc = checkpoint.get('val_acc', 'N/A')
+                    arch_type = "BatchNorm" if use_batch_norm else "Standard"
+                    logger.info(f"Loaded EfficientNet model {i+1}/5 (fold {i}, {arch_type}) - Val Acc: {val_acc:.3f}")
             
             if self.efficientnet_models:
-                logger.info(f"EfficientNet ensemble loaded with {len(self.efficientnet_models)} models")
+                logger.info(f"EfficientNet ensemble ({model_dir}) loaded with {len(self.efficientnet_models)} models")
                 
                 # Load class mapping from the first model
                 checkpoint = torch.load(ensemble_paths[0], map_location='cpu')
                 self.class_mapping = checkpoint.get('class_mapping', {})
                 logger.info(f"Loaded class mapping with {self.class_mapping.get('num_classes', 12)} classes")
             else:
-                logger.warning("No EfficientNet models found in models/improved/")
+                logger.warning(f"No EfficientNet models found in models/{model_dir}/")
                 
         except Exception as e:
             logger.error(f"Failed to load EfficientNet ensemble: {e}")
@@ -310,15 +355,15 @@ class UnifiedPestDetector:
         """Load YOLO model as secondary detection backend."""
         try:
             # Try trained pest-specific YOLO model first
-            pest_yolo_path = self.model_path / "pest_model_yolov8n.pt"
+            pest_yolo_path = self.model_path / "yolo" / "pest_model_yolov8n.pt"
             if pest_yolo_path.exists():
                 from ultralytics import YOLO
                 self.yolo_model = YOLO(str(pest_yolo_path))
                 logger.info(f"Loaded trained YOLO pest model: {pest_yolo_path}")
                 return
             
-            # Fallback to pre-trained YOLO classification model
-            base_yolo_path = self.model_path / "yolov8n-cls.pt"
+            # Fallback to archived YOLO classification model
+            base_yolo_path = self.model_path / "archive" / "yolov8n-cls.pt"
             if base_yolo_path.exists():
                 from ultralytics import YOLO
                 self.yolo_model = YOLO(str(base_yolo_path))
@@ -369,6 +414,54 @@ class UnifiedPestDetector:
                                std=[0.5, 0.5, 0.5])
         ])
     
+    def get_available_models(self):
+        """Get list of available models for selection."""
+        available_models = []
+        
+        # Check for EfficientNet models
+        efficientnet_models = [
+            ("efficientnet_v1", "EfficientNet v1", "efficientnet/v1"),
+            ("efficientnet_v2", "EfficientNet v2", "efficientnet/v2"),
+            ("efficientnet_v3", "EfficientNet v3", "efficientnet/v3")
+        ]
+        
+        for model_id, model_name, model_dir in efficientnet_models:
+            model_path = self.model_path / model_dir / "best_model_fold_0.pth"
+            if model_path.exists():
+                available_models.append({
+                    'id': model_id,
+                    'name': model_name,
+                    'type': 'EfficientNet',
+                    'path': model_dir
+                })
+        
+        # Check for YOLO model
+        yolo_path = self.model_path / "yolo" / "pest_model_yolov8n.pt"
+        if yolo_path.exists():
+            available_models.append({
+                'id': 'yolo',
+                'name': 'YOLO v8',
+                'type': 'Detection',
+                'path': 'yolo/pest_model_yolov8n.pt'
+            })
+        
+        return available_models
+    
+    def switch_model(self, selected_model):
+        """Switch to a different model."""
+        self.selected_model = selected_model
+        
+        # Clear existing models
+        self.efficientnet_models = []
+        self.yolo_model = None
+        self.basic_model = None
+        self.class_mapping = {}
+        
+        # Reinitialize with selected model
+        self._initialize_backends()
+        
+        return True
+    
     def _get_available_backends(self):
         """Get list of available detection backends."""
         backends = []
@@ -382,7 +475,7 @@ class UnifiedPestDetector:
     
     def detect_pest(self, image_path):
         """
-        Detect pest in image using EfficientNet ensemble.
+        Detect pest in image using the selected model.
         
         Args:
             image_path (str or Path): Path to image file
@@ -399,15 +492,21 @@ class UnifiedPestDetector:
             if image.mode != 'RGB':
                 image = image.convert('RGB')
             
-            # Use EfficientNet ensemble if available
-            if self.efficientnet_models:
-                return self._detect_with_efficientnet(image)
-            elif self.yolo_model:
+            # Use the specifically selected model first
+            if self.selected_model == 'yolo' and self.yolo_model:
                 return self._detect_with_yolo(image)
-            elif self.basic_model:
-                return self._detect_with_basic(image)
+            elif self.selected_model in ['efficientnet_v1', 'efficientnet_v2', 'efficientnet_v3'] and self.efficientnet_models:
+                return self._detect_with_efficientnet(image)
             else:
-                return self._create_error_result("No detection models available")
+                # Fallback to available models in priority order
+                if self.efficientnet_models:
+                    return self._detect_with_efficientnet(image)
+                elif self.yolo_model:
+                    return self._detect_with_yolo(image)
+                elif self.basic_model:
+                    return self._detect_with_basic(image)
+                else:
+                    return self._create_error_result("No detection models available")
                 
         except Exception as e:
             logger.error(f"Error in pest detection: {e}")
@@ -457,12 +556,23 @@ class UnifiedPestDetector:
             success = (max_confidence >= self.confidence_threshold and 
                       uncertainty <= self.uncertainty_threshold)
             
+            # Determine the method name based on selected model
+            if self.selected_model == 'efficientnet_v1':
+                method_name = 'EfficientNet v1'
+            elif self.selected_model == 'efficientnet_v2':
+                method_name = 'EfficientNet v2'
+            elif self.selected_model == 'efficientnet_v3':
+                method_name = 'EfficientNet v3'
+            else:
+                method_name = 'EfficientNet-B0 Ensemble'
+            
             result = {
                 'success': success,
                 'pest_type': predicted_pest if success else 'unknown',
                 'confidence': float(max_confidence),
                 'uncertainty': float(uncertainty),
-                'method': 'EfficientNet-B0 Ensemble',
+                'method': method_name,
+                'selected_model': self.selected_model,
                 'models_used': len(self.efficientnet_models),
                 'mc_samples': n_samples,
                 'all_probabilities': {class_names[i]: float(mean_probs[i]) 
@@ -525,7 +635,8 @@ class UnifiedPestDetector:
                         'pest_type': predicted_pest if success else 'unknown',
                         'confidence': confidence,
                         'uncertainty': 1.0 - confidence,  # Simple uncertainty estimate
-                        'method': 'YOLO Classification',
+                        'method': 'YOLO v8',
+                        'selected_model': self.selected_model,
                         'all_probabilities': {class_names[i]: float(probs[i]) 
                                             for i in range(min(len(class_names), len(probs)))},
                         'metadata': self._get_pest_metadata(predicted_pest) if success else None,
