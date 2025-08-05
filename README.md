@@ -97,7 +97,6 @@ Final-Project/
 │   └── model_optimizer.py        # Model compression for deployment
 │
 ├── 🧠 models/                    # Trained Models
-│   ├── archive/                  # Archived model versions
 │   ├── efficientnet/            # EfficientNet-B0 ensemble models
 │   │   └── v3/                   # Latest version (93.17% accuracy)
 │   ├── optimized/                # Edge-optimized versions
