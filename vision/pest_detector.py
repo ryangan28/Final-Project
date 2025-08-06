@@ -121,6 +121,43 @@ class EfficientNetClassifier(nn.Module):
                 module.train()
 
 
+class ResNetClassifier(nn.Module):
+    """ResNet-34 based pest classifier with custom classification head matching training script."""
+    
+    def __init__(self, num_classes=12, dropout_rate=0.4):
+        super(ResNetClassifier, self).__init__()
+        # Load pre-trained ResNet-34 (matching the training script)
+        self.resnet = models.resnet34(weights='DEFAULT')
+        
+        # Replace fc layer with custom classifier matching the training script exactly
+        # Training script: nn.Sequential(nn.Linear(512, 512), nn.ReLU(), nn.Dropout(0.4), nn.Linear(512, num_classes))
+        in_features = self.resnet.fc.in_features  # Should be 512 for ResNet-34
+        
+        self.resnet.fc = nn.Sequential(
+            nn.Linear(in_features, 512),
+            nn.ReLU(),
+            nn.Dropout(dropout_rate),
+            nn.Linear(512, num_classes)
+        )
+        
+        # Temperature scaling for uncertainty calibration (optional, not in training)
+        self.temperature = nn.Parameter(torch.ones(1) * 1.5)
+        
+        # Enable Monte Carlo Dropout for uncertainty estimation
+        self.dropout_rate = dropout_rate
+    
+    def forward(self, x):
+        logits = self.resnet(x)
+        # Apply temperature scaling
+        return logits / self.temperature
+    
+    def enable_mc_dropout(self):
+        """Enable Monte Carlo Dropout for uncertainty estimation."""
+        for module in self.modules():
+            if isinstance(module, nn.Dropout):
+                module.train()
+
+
 class UnifiedPestDetector:
     """
     Unified pest detection system with multiple backend support and graceful degradation.
@@ -252,6 +289,7 @@ class UnifiedPestDetector:
         # Detection backends
         self.efficientnet_models = []
         self.yolo_model = None
+        self.resnet_model = None
         self.basic_model = None
         self.class_mapping = {}
         
@@ -273,6 +311,9 @@ class UnifiedPestDetector:
         elif self.selected_model in ['efficientnet_v1', 'efficientnet_v2', 'efficientnet_v3']:
             if ML_CAPABILITIES['pytorch']:
                 self._load_efficientnet_ensemble(self.selected_model)
+        elif self.selected_model == 'resnet34':
+            if ML_CAPABILITIES['pytorch']:
+                self._load_resnet_model()
         # If no model is selected, load all available backends for dropdown selection
         else:
             # Load default EfficientNet model
@@ -376,6 +417,68 @@ class UnifiedPestDetector:
             logger.error(f"Failed to load YOLO model: {e}")
             self.yolo_model = None
     
+    def _load_resnet_model(self):
+        """Load ResNet-34 model for pest classification."""
+        try:
+            resnet_path = self.model_path / "resnet" / "resnet34_best.pth"
+            if resnet_path.exists():
+                device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+                logger.info(f"Loading ResNet-34 model on device: {device}")
+                
+                # Load the saved state dict (training script saves direct state_dict)
+                state_dict = torch.load(resnet_path, map_location=device)
+                
+                # Check the number of classes from the final layer
+                final_layer_key = 'fc.3.weight'  # fc.3 is the final Linear layer in our sequential
+                if final_layer_key in state_dict:
+                    num_classes = state_dict[final_layer_key].shape[0]
+                    logger.info(f"Detected {num_classes} classes from model")
+                else:
+                    num_classes = 12  # Default fallback
+                    logger.warning("Could not detect number of classes, using default 12")
+                
+                # Create ResNet model instance with correct number of classes
+                self.resnet_model = ResNetClassifier(num_classes=num_classes, dropout_rate=0.4)
+                
+                # Remove temperature parameter from state_dict if present (not in training)
+                model_state_dict = self.resnet_model.state_dict()
+                filtered_state_dict = {}
+                
+                for key, value in state_dict.items():
+                    if key in model_state_dict:
+                        # Check if dimensions match
+                        if model_state_dict[key].shape == value.shape:
+                            filtered_state_dict[key] = value
+                        else:
+                            logger.warning(f"Shape mismatch for {key}: expected {model_state_dict[key].shape}, got {value.shape}")
+                    else:
+                        logger.debug(f"Skipping key not in model: {key}")
+                
+                # Load the filtered state dict
+                model_state_dict.update(filtered_state_dict)
+                self.resnet_model.load_state_dict(model_state_dict)
+                
+                self.resnet_model.to(device)
+                self.resnet_model.eval()
+                self.resnet_model.enable_mc_dropout()  # Enable uncertainty estimation
+                
+                # Set class mapping based on pest database (training uses ImageFolder default ordering)
+                # ImageFolder typically orders classes alphabetically
+                pest_classes = sorted(list(self.PEST_DATABASE.keys()))
+                self.class_mapping = {pest: idx for idx, pest in enumerate(pest_classes)}
+                
+                logger.info(f"ResNet-34 model loaded successfully with {num_classes} classes")
+                logger.info(f"Class mapping: {list(pest_classes)}")
+            else:
+                logger.warning(f"ResNet-34 model not found at {resnet_path}")
+                self.resnet_model = None
+                
+        except Exception as e:
+            logger.error(f"Failed to load ResNet-34 model: {e}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            self.resnet_model = None
+    
     def _load_basic_model(self):
         """Load basic CNN model as final ML fallback."""
         try:
@@ -435,6 +538,16 @@ class UnifiedPestDetector:
                     'path': model_dir
                 })
         
+        # Check for ResNet models
+        resnet_path = self.model_path / "resnet" / "resnet34_best.pth"
+        if resnet_path.exists():
+            available_models.append({
+                'id': 'resnet34',
+                'name': 'ResNet-34',
+                'type': 'ResNet',
+                'path': 'resnet/resnet34_best.pth'
+            })
+        
         # Check for YOLO model
         yolo_path = self.model_path / "yolo" / "pest_model_yolov8n.pt"
         if yolo_path.exists():
@@ -454,6 +567,7 @@ class UnifiedPestDetector:
         # Clear existing models
         self.efficientnet_models = []
         self.yolo_model = None
+        self.resnet_model = None
         self.basic_model = None
         self.class_mapping = {}
         
@@ -467,6 +581,8 @@ class UnifiedPestDetector:
         backends = []
         if self.efficientnet_models:
             backends.append("EfficientNet-B0 Ensemble")
+        if self.resnet_model:
+            backends.append("ResNet-34")
         if self.yolo_model:
             backends.append("YOLO Classification")
         if self.basic_model:
@@ -497,10 +613,14 @@ class UnifiedPestDetector:
                 return self._detect_with_yolo(image)
             elif self.selected_model in ['efficientnet_v1', 'efficientnet_v2', 'efficientnet_v3'] and self.efficientnet_models:
                 return self._detect_with_efficientnet(image)
+            elif self.selected_model == 'resnet34' and self.resnet_model:
+                return self._detect_with_resnet(image)
             else:
                 # Fallback to available models in priority order
                 if self.efficientnet_models:
                     return self._detect_with_efficientnet(image)
+                elif self.resnet_model:
+                    return self._detect_with_resnet(image)
                 elif self.yolo_model:
                     return self._detect_with_yolo(image)
                 elif self.basic_model:
@@ -663,6 +783,73 @@ class UnifiedPestDetector:
         except Exception as e:
             logger.error(f"YOLO detection failed: {e}")
             return self._create_error_result(f"YOLO error: {str(e)}")
+    
+    def _detect_with_resnet(self, image):
+        """Detect pest using ResNet-34 model with uncertainty quantification."""
+        try:
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            
+            # Preprocess image
+            input_tensor = self.efficientnet_transform(image).unsqueeze(0).to(device)
+            
+            # Monte Carlo Dropout for uncertainty estimation
+            n_samples = 10
+            predictions = []
+            
+            with torch.no_grad():
+                for _ in range(n_samples):
+                    # Forward pass with MC dropout
+                    logits = self.resnet_model(input_tensor)
+                    probs = F.softmax(logits, dim=1)
+                    predictions.append(probs.cpu().numpy()[0])
+            
+            # Calculate ensemble statistics
+            predictions = np.array(predictions)
+            mean_probs = np.mean(predictions, axis=0)
+            uncertainty = np.mean(np.var(predictions, axis=0))  # Predictive uncertainty
+            
+            # Get prediction
+            predicted_class = np.argmax(mean_probs)
+            max_confidence = float(np.max(mean_probs))
+            
+            # Map to class names
+            if self.class_mapping:
+                class_to_name = {v: k for k, v in self.class_mapping.items()}
+                class_names = [class_to_name.get(i, f'class_{i}') for i in range(len(mean_probs))]
+            else:
+                class_names = list(self.PEST_DATABASE.keys())[:len(mean_probs)]
+            
+            predicted_pest = class_names[predicted_class]
+            
+            # Apply thresholds
+            success = (max_confidence >= self.confidence_threshold and 
+                      uncertainty <= self.uncertainty_threshold)
+            
+            result = {
+                'success': success,
+                'pest_type': predicted_pest if success else 'unknown',
+                'confidence': float(max_confidence),
+                'uncertainty': float(uncertainty),
+                'method': 'ResNet-34',
+                'selected_model': self.selected_model,
+                'mc_samples': n_samples,
+                'all_probabilities': {class_names[i]: float(mean_probs[i]) 
+                                    for i in range(len(class_names))},
+                'metadata': self._get_pest_metadata(predicted_pest) if success else None,
+                'thresholds': {
+                    'confidence': self.confidence_threshold,
+                    'uncertainty': self.uncertainty_threshold
+                }
+            }
+            
+            logger.info(f"ResNet-34 detection: {predicted_pest} "
+                       f"(conf: {max_confidence:.3f}, unc: {uncertainty:.3f})")
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"ResNet-34 detection failed: {e}")
+            return self._create_error_result(f"ResNet-34 error: {str(e)}")
     
     def _detect_with_basic(self, image):
         """Detect pest using basic CNN classifier."""
