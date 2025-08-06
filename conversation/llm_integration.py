@@ -112,14 +112,14 @@ Keep responses practical, farmer-friendly, and focused on sustainable agricultur
                 return result['choices'][0]['message']['content']
             else:
                 logger.error(f"LM Studio API error: {response.status_code}")
-                return self._fallback_response()
+                raise ConnectionError(f"LM Studio API returned status {response.status_code}")
                 
         except requests.exceptions.RequestException as e:
             logger.error(f"Connection to LM Studio failed: {e}")
-            return self._fallback_response()
+            raise ConnectionError(f"Failed to connect to LM Studio: {e}")
         except Exception as e:
             logger.error(f"LLM generation failed: {e}")
-            return self._fallback_response()
+            raise RuntimeError(f"LLM generation error: {e}")
 
     def _format_pest_context(self, pest_context: Dict[str, Any]) -> str:
         """Format pest detection context for LLM."""

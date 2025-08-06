@@ -217,12 +217,26 @@ class ChatInterface:
     
     def _get_treatment_guidance(self):
         """Provide treatment guidance based on context."""
-        if not self.context.get('pest_type'):
+        # Check for pest context in the last_detection or direct context
+        pest_type = None
+        severity = 'medium'
+        
+        if self.context.get('last_detection'):
+            pest_type = self.context['last_detection'].get('pest_type')
+            harm_level = self.context['last_detection'].get('harm_level')
+            # Map harm_level to severity
+            if harm_level:
+                if 'high' in str(harm_level).lower():
+                    severity = 'high'
+                elif 'low' in str(harm_level).lower():
+                    severity = 'low'
+        elif self.context.get('pest_type'):
+            pest_type = self.context['pest_type']
+            severity = self.context.get('severity', 'medium')
+        
+        if not pest_type:
             return ("I'd be happy to help with treatment options! First, let me identify the pest. "
                    "Please upload a photo of the pest or damage you're seeing.")
-        
-        pest_type = self.context['pest_type']
-        severity = self.context.get('severity', 'medium')
         
         response = f"For {pest_type} control, I recommend an Integrated Pest Management approach:\n\n"
         
@@ -251,7 +265,16 @@ class ChatInterface:
         import random
         base_response = random.choice(self.responses['urgency_assessment'])
         
-        if self.context.get('severity') == 'high':
+        # Check severity from last_detection or direct context
+        severity = 'medium'
+        if self.context.get('last_detection'):
+            harm_level = self.context['last_detection'].get('harm_level')
+            if harm_level and 'high' in str(harm_level).lower():
+                severity = 'high'
+        elif self.context.get('severity'):
+            severity = self.context['severity']
+        
+        if severity == 'high':
             return (f"{base_response}\n\n"
                    "🚨 **IMMEDIATE ACTIONS:**\n"
                    "1. Physical removal of visible pests\n"
@@ -282,8 +305,14 @@ class ChatInterface:
     
     def _get_timing_guidance(self):
         """Provide timing guidance for treatments."""
-        if self.context.get('pest_type'):
+        # Check for pest type in last_detection or direct context
+        pest_type = None
+        if self.context.get('last_detection'):
+            pest_type = self.context['last_detection'].get('pest_type')
+        elif self.context.get('pest_type'):
             pest_type = self.context['pest_type']
+        
+        if pest_type:
             timing_map = {
                 'Aphids': 'Early morning applications, weekly monitoring during growing season',
                 'Caterpillars': 'Target young larvae, evening applications for biological controls',
@@ -379,8 +408,14 @@ class ChatInterface:
     
     def _get_contextual_response(self):
         """Generate response based on current context."""
-        if self.context.get('pest_type'):
+        # Check for pest type in last_detection or direct context
+        pest_type = None
+        if self.context.get('last_detection'):
+            pest_type = self.context['last_detection'].get('pest_type')
+        elif self.context.get('pest_type'):
             pest_type = self.context['pest_type']
+        
+        if pest_type:
             return (f"I understand you're dealing with {pest_type}. "
                    f"Could you be more specific about what aspect you'd like help with? "
                    f"I can provide information about:\n\n"
